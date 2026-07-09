@@ -16,7 +16,7 @@ import {
 const firebaseConfig = {
 	apiKey: PUBLIC_FIREBASE_API_KEY?.trim(),
 	authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN?.trim(),
-	databaseURL: PUBLIC_FIREBASE_DATABASE_URL?.trim(),
+	databaseURL: PUBLIC_FIREBASE_DATABASE_URL?.trim() || 'https://internship-7f490-default-rtdb.firebaseio.com',
 	projectId: PUBLIC_FIREBASE_PROJECT_ID?.trim(),
 	storageBucket: PUBLIC_FIREBASE_STORAGE_BUCKET?.trim(),
 	messagingSenderId: PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim(),
