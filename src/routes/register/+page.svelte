@@ -1,0 +1,354 @@
+<script>
+	import { enhance } from '$app/forms';
+
+	let { data, form } = $props();
+
+	// Select registration type (Student vs Company)
+	// svelte-ignore state_referenced_locally
+	let initialRole = data.role;
+	// svelte-ignore state_referenced_locally
+	let activeTab = $state(initialRole === 'company' ? 'company' : 'student');
+	let loading = $state(false);
+
+	let studentPassword = $state('');
+	let companyPassword = $state('');
+
+	// Validation helpers
+	let hasMinLength = $derived((activeTab === 'student' ? studentPassword : companyPassword).length >= 8);
+	let hasUppercase = $derived(/[A-Z]/.test(activeTab === 'student' ? studentPassword : companyPassword));
+	let hasLowercase = $derived(/[a-z]/.test(activeTab === 'student' ? studentPassword : companyPassword));
+	let hasNumber = $derived(/[0-9]/.test(activeTab === 'student' ? studentPassword : companyPassword));
+	let hasSpecial = $derived(/[^A-Za-z0-9]/.test(activeTab === 'student' ? studentPassword : companyPassword));
+	let isPasswordValid = $derived(hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecial);
+
+	const industries = [
+		'Software & IT',
+		'Engineering',
+		'Commerce & Finance',
+		'Business & Management',
+		'Marketing & Sales',
+		'Design & Creative Arts',
+		'Media & Communication',
+		'Healthcare & Medical',
+		'Education & Research',
+		'Arts, Literature & Languages',
+		'Social Sciences',
+		'Law & Governance',
+		'Agriculture & Environment',
+		'Hospitality & Tourism',
+		'Emerging Domains',
+		'Government & Public Services'
+	];
+</script>
+
+<div class="min-h-screen py-12 px-4 md:px-8 flex items-center justify-center relative">
+	<!-- Ambient Background Glows -->
+	<div class="absolute top-10 left-10 w-96 h-96 rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none animate-pulse-slow"></div>
+	<div class="absolute bottom-10 right-10 w-[450px] h-[450px] rounded-full bg-emerald-500/10 blur-[150px] pointer-events-none"></div>
+
+	<!-- Glassmorphic Card Container -->
+	<div class="w-full max-w-2xl rounded-3xl glass p-8 md:p-10 shadow-2xl relative border border-slate-200/20">
+		<!-- Back to home -->
+		<a href="/" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-indigo-500 mb-6 transition cursor-pointer">
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+			Back to home
+		</a>
+
+		<div class="text-center mb-8">
+			<h1 class="font-display font-black text-3xl text-primary tracking-tight">
+				Create Your Nexora Account
+			</h1>
+			<p class="text-sm text-muted mt-2">
+				Join our platform to expand your opportunities.
+			</p>
+		</div>
+
+		<!-- Form Tabs -->
+		<div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-2xl mb-8 border border-slate-200/5">
+			<button
+				type="button"
+				onclick={() => activeTab = 'student'}
+				class="py-3 rounded-xl text-sm font-bold transition duration-200 cursor-pointer {activeTab === 'student' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 '}"
+			>
+				Student Registration
+			</button>
+			<button
+				type="button"
+				onclick={() => activeTab = 'company'}
+				class="py-3 rounded-xl text-sm font-bold transition duration-200 cursor-pointer {activeTab === 'company' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 '}"
+			>
+				Company Registration
+			</button>
+		</div>
+
+		<!-- Error Feedback -->
+		{#if form?.error}
+			<div class="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-xs font-semibold flex items-center gap-2">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+				{form.error}
+			</div>
+		{/if}
+
+		<!-- Student Registration Form -->
+		{#if activeTab === 'student'}
+			<form
+				action="?/registerStudent"
+				method="POST"
+				enctype="multipart/form-data"
+				use:enhance={() => {
+					loading = true;
+					return ({ update }) => {
+						loading = false;
+						update();
+					};
+				}}
+				class="space-y-6"
+			>
+				<!-- Section title -->
+				<div class="border-b border-slate-200/10 pb-2 mb-4">
+					<h3 class="text-xs font-bold text-slate-600 uppercase tracking-widest">Personal Details</h3>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+					<div>
+						<label for="fullName" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Full Name *</label>
+						<input type="text" id="fullName" name="fullName" required placeholder="John Doe" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="email" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Email Address *</label>
+						<input type="email" id="email" name="email" required placeholder="john@example.com" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="mobileNumber" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Mobile Number *</label>
+						<input type="tel" id="mobileNumber" name="mobileNumber" required placeholder="9876543210" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="password" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Password *</label>
+						<input type="password" id="password" name="password" required bind:value={studentPassword} placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none mb-2" />
+						
+						<!-- Password Validation Feedback -->
+						<div class="space-y-1 text-xs">
+							<div class="flex items-center gap-2 {hasMinLength ? 'text-emerald-500' : 'text-slate-400'}">
+								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasMinLength ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+								Minimum 8 characters
+							</div>
+							<div class="flex items-center gap-2 {hasUppercase ? 'text-emerald-500' : 'text-slate-400'}">
+								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasUppercase ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+								One uppercase letter
+							</div>
+							<div class="flex items-center gap-2 {hasLowercase ? 'text-emerald-500' : 'text-slate-400'}">
+								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasLowercase ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+								One lowercase letter
+							</div>
+							<div class="flex items-center gap-2 {hasNumber ? 'text-emerald-500' : 'text-slate-400'}">
+								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasNumber ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+								One number
+							</div>
+							<div class="flex items-center gap-2 {hasSpecial ? 'text-emerald-500' : 'text-slate-400'}">
+								<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasSpecial ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+								One special character
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="border-b border-slate-200/10 pb-2 mb-4 pt-4">
+					<h3 class="text-xs font-bold text-slate-600 uppercase tracking-widest">Academic & Qualifications</h3>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+					<div class="md:col-span-2">
+						<label for="collegeName" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">College/University Name *</label>
+						<input type="text" id="collegeName" name="collegeName" required placeholder="IIT Madras, NIT Trichy, etc." class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="degreeCourse" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Degree / Course *</label>
+						<input type="text" id="degreeCourse" name="degreeCourse" required placeholder="B.E, B.Tech, M.B.A, B.Com" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="department" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Department *</label>
+						<input type="text" id="department" name="department" required placeholder="Computer Science, Mechanical, Finance" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="yearOfStudy" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Year of Study *</label>
+						<select id="yearOfStudy" name="yearOfStudy" required class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none">
+							<option value="1">1st Year</option>
+							<option value="2">2nd Year</option>
+							<option value="3">3rd Year</option>
+							<option value="4">4th Year</option>
+							<option value="5">5th Year</option>
+						</select>
+					</div>
+
+					<div>
+						<label for="currentStatus" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Current Status *</label>
+						<select id="currentStatus" name="currentStatus" required class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none">
+							<option value="Student">Currently Studying (Student)</option>
+							<option value="Graduate">Graduated (Graduate)</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="border-b border-slate-200/10 pb-2 mb-4 pt-4">
+					<h3 class="text-xs font-bold text-slate-600 uppercase tracking-widest">Resume & Professional Profile</h3>
+				</div>
+
+				<div class="space-y-4">
+					<div>
+						<label for="resumeUrl" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Resume URL *</label>
+						<input type="url" id="resumeUrl" name="resumeUrl" placeholder="https://drive.google.com/file/..." required class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="skills" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Skills (Comma Separated) *</label>
+						<input type="text" id="skills" name="skills" required placeholder="React, Node.js, Python, Figma, Accounting" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="profilePhoto" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Profile Photo URL (Optional)</label>
+						<input type="text" id="profilePhoto" name="profilePhoto" placeholder="https://example.com/avatar.jpg" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="address" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Contact Address *</label>
+						<textarea id="address" name="address" required rows="3" placeholder="Flat No, Street Name, City, Pincode" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none"></textarea>
+					</div>
+				</div>
+
+				<button
+					type="submit"
+					disabled={loading || !isPasswordValid}
+					class="w-full py-4 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/10 active:scale-98 transition duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+				>
+					{#if loading}
+						<span class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+						Registering Profile...
+					{:else}
+						Complete Student Registration
+					{/if}
+				</button>
+			</form>
+		{:else}
+			<!-- Company Registration Form -->
+			<form
+				action="?/registerCompany"
+				method="POST"
+				use:enhance={() => {
+					loading = true;
+					return ({ update }) => {
+						loading = false;
+						update();
+					};
+				}}
+				class="space-y-6"
+			>
+				<div class="border-b border-slate-200/10 pb-2 mb-4">
+					<h3 class="text-xs font-bold text-slate-600 uppercase tracking-widest">Company Identification</h3>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+					<div>
+						<label for="companyName" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Company Name *</label>
+						<input type="text" id="companyName" name="companyName" required placeholder="Google, TechNova Solutions, etc." class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="companyEmail" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Corporate Email Address *</label>
+						<input type="email" id="companyEmail" name="companyEmail" required placeholder="recruiting@company.com" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="companyContactNumber" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Company Contact Number *</label>
+						<input type="tel" id="companyContactNumber" name="companyContactNumber" required placeholder="044-1234567" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+
+					<div>
+						<label for="website" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Corporate Website *</label>
+						<input type="url" id="website" name="website" required placeholder="https://mycompany.com" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+					<div>
+						<label for="industryType" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Industry Sector *</label>
+						<select id="industryType" name="industryType" required class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none">
+							{#each industries as industry}
+								<option value={industry}>{industry}</option>
+							{/each}
+						</select>
+					</div>
+
+					<div>
+						<label for="companyLogo" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Company Logo URL (Optional)</label>
+						<input type="text" id="companyLogo" name="companyLogo" placeholder="https://example.com/logo.png" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none" />
+					</div>
+				</div>
+
+				<div>
+					<label for="password" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Account Password *</label>
+					<input type="password" id="password" name="password" required bind:value={companyPassword} placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none mb-2" />
+					
+					<!-- Password Validation Feedback -->
+					<div class="space-y-1 text-xs">
+						<div class="flex items-center gap-2 {hasMinLength ? 'text-emerald-500' : 'text-slate-400'}">
+							<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasMinLength ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+							Minimum 8 characters
+						</div>
+						<div class="flex items-center gap-2 {hasUppercase ? 'text-emerald-500' : 'text-slate-400'}">
+							<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasUppercase ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+							One uppercase letter
+						</div>
+						<div class="flex items-center gap-2 {hasLowercase ? 'text-emerald-500' : 'text-slate-400'}">
+							<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasLowercase ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+							One lowercase letter
+						</div>
+						<div class="flex items-center gap-2 {hasNumber ? 'text-emerald-500' : 'text-slate-400'}">
+							<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasNumber ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+							One number
+						</div>
+						<div class="flex items-center gap-2 {hasSpecial ? 'text-emerald-500' : 'text-slate-400'}">
+							<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={hasSpecial ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}></path></svg>
+							One special character
+						</div>
+					</div>
+				</div>
+
+				<div>
+					<label for="companyDescription" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Company Description *</label>
+					<textarea id="companyDescription" name="companyDescription" required rows="3" placeholder="Briefly describe what your organization does..." class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none"></textarea>
+				</div>
+
+				<div>
+					<label for="companyAddress" class="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Corporate HQ Address *</label>
+					<textarea id="companyAddress" name="companyAddress" required rows="2" placeholder="Suite, Building, Street, City, ZIP" class="w-full px-4 py-3 rounded-xl border border-divider bg-white/50 text-sm text-primary focus:border-indigo-500 focus:outline-none"></textarea>
+				</div>
+
+				<button
+					type="submit"
+					disabled={loading || !isPasswordValid}
+					class="w-full py-4 rounded-xl font-bold text-primary bg-indigo-600 hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/10 active:scale-98 transition duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+				>
+					{#if loading}
+						<span class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+						Submitting Corporate Request...
+					{:else}
+						Submit Company Request
+					{/if}
+				</button>
+			</form>
+		{/if}
+
+		<div class="mt-8 pt-6 border-t border-slate-200/10 text-center text-sm">
+			<span class="text-slate-500">Already registered on Nexora?</span>
+			<a href="/login" class="font-bold text-indigo-500 hover:underline ml-1">
+				Sign In
+			</a>
+		</div>
+	</div>
+</div>
