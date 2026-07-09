@@ -27,7 +27,7 @@
 				if (Array.isArray(val)) {
 					allMsgs = val.map((m, idx) => m ? { ...m, _index: idx } : null).filter(Boolean);
 				} else if (typeof val === 'object') {
-					allMsgs = Object.entries(val).map(([key, m]) => m ? { ...m, _index: Number(key) } : null).filter(Boolean);
+					allMsgs = Object.entries(val).map(([key, m]) => m ? { ...m, _index: key } : null).filter(Boolean);
 				}
 				
 				messages = allMsgs.filter(m => 
