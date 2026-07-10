@@ -18,7 +18,7 @@ export async function load({ cookies }) {
 export const actions = {
 	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
-		const email = formData.get('email')?.toString().trim();
+		const email = formData.get('email')?.toString().trim().toLowerCase();
 		const password = formData.get('password')?.toString();
 		const role = formData.get('role')?.toString(); // 'student' | 'company' | 'admin'
 
