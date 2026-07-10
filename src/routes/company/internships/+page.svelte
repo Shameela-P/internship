@@ -188,7 +188,7 @@
 										Closed
 									</span>
 								{:else}
-									<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-slate-800 text-slate-600">
+									<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-500">
 										Archived
 									</span>
 								{/if}
@@ -231,7 +231,7 @@
 						<!-- Edit -->
 						<button
 							onclick={() => openEditModal(intern)}
-							class="px-3 py-1.5 rounded-lg border border-divider hover:bg-slate-800 text-[10px] font-bold text-slate-300 hover:text-primary transition cursor-pointer"
+							class="px-3 py-1.5 rounded-lg border border-divider hover:bg-slate-100 text-[10px] font-bold text-slate-500 hover:text-primary transition cursor-pointer"
 						>
 							Edit
 						</button>

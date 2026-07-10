@@ -221,7 +221,7 @@
 										ONLINE
 									</span>
 								{:else if intern.mode === 'Offline'}
-									<span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-slate-800 text-slate-600">
+									<span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-500">
 										OFFLINE
 									</span>
 								{:else}
@@ -248,7 +248,7 @@
 					<!-- Skills -->
 					<div class="flex flex-wrap gap-1.5 mt-4">
 						{#each intern.skillsRequired as skill}
-							<span class="px-2 py-0.5 rounded bg-slate-950/60 text-[9px] font-semibold text-slate-600">
+							<span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[9px] font-semibold text-slate-700">
 								{skill}
 							</span>
 						{/each}

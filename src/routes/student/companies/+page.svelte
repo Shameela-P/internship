@@ -412,7 +412,7 @@
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 			{#each companies as comp}
 				<!-- Slick, reduced-height card with lift up, border glow, shadow transitions -->
-				<div class="group p-5 rounded-2xl bg-surface hover:bg-slate-900/70 border border-divider hover:border-blue-500/40 flex flex-col justify-between shadow-md hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:-translate-y-1 transition-all duration-300 min-h-[175px]">
+				<div class="group p-5 rounded-2xl bg-surface hover:bg-slate-50 border border-divider hover:border-blue-500/40 flex flex-col justify-between shadow-md hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:-translate-y-1 transition-all duration-300 min-h-[175px]">
 					<div>
 						<!-- Header -->
 						<div class="flex items-start gap-3">
@@ -428,7 +428,7 @@
 									<span class="text-blue-400 shrink-0" title="Verified Corporate Partner">
 										<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
 									</span>
-									<span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-slate-800 text-slate-600 shrink-0">
+									<span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-slate-100 border border-slate-200 text-slate-700 shrink-0">
 										{comp.industryType}
 									</span>
 								</div>
@@ -440,7 +440,7 @@
 										{comp.companyAddress.split(',').pop().trim()}
 									</span>
 									
-									<span class="h-1 w-1 rounded-full bg-slate-800"></span>
+									<span class="h-1 w-1 rounded-full bg-slate-300"></span>
 
 									<span class="flex items-center gap-0.5 text-amber-500">
 										<svg class="h-3 w-3 fill-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
@@ -478,7 +478,7 @@
 							
 							<button
 								onclick={() => toggleSave(comp.id)}
-								class="p-1 rounded hover:bg-slate-800 transition duration-200 cursor-pointer text-slate-500 hover:text-primary"
+								class="p-1 rounded hover:bg-slate-100 transition duration-200 cursor-pointer text-slate-500 hover:text-primary"
 								title={savedCompanies.has(comp.id) ? 'Saved' : 'Save Company'}
 							>
 								<svg
@@ -561,7 +561,7 @@
 					<a href={selectedCompanyDetail.website} target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-primary font-bold text-[10px] transition cursor-pointer">
 						Visit Corporate Website
 					</a>
-					<a href={`/student/internships?query=${encodeURIComponent(selectedCompanyDetail.companyName)}`} class="px-4 py-2 rounded-lg border border-divider hover:bg-slate-800 font-bold text-[10px] transition cursor-pointer text-slate-300 hover:text-primary">
+					<a href={`/student/internships?query=${encodeURIComponent(selectedCompanyDetail.companyName)}`} class="px-4 py-2 rounded-lg border border-divider hover:bg-slate-100 font-bold text-[10px] transition cursor-pointer text-slate-500 hover:text-primary">
 						Explore Openings
 					</a>
 				</div>

@@ -21,8 +21,8 @@ export async function load({ cookies, url }) {
 	const filterJobOpp = url.searchParams.get('jobOpportunity') || '';
 	const filterCert = url.searchParams.get('certificateAvailable') || '';
 
-	// Use paginated query instead of loading the entire database for search
-	const internshipsData = await queryDocumentsPaginated('internships', 'status', 'Active', 200);
+	// Use paginated query instead of loading the entire database for search, but increase limit to allow searching the expanded dataset
+	const internshipsData = await queryDocumentsPaginated('internships', 'status', 'Active', 2000);
     
     // Batch fetch only needed companies
     const companyIds = [...new Set(internshipsData.map(i => i.companyId))];

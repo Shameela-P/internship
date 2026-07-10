@@ -4,9 +4,10 @@ import { fail } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
 	const sessionUser = requireRole(cookies, ['student']);
-	const db = {
-		students: await getCollection('students')
-	};
+	const [students] = await Promise.all([
+		getCollection('students')
+	]);
+	const db = { students };
 	const student = db.students.find(s => s.id === sessionUser.id);
 	return {
 		student
@@ -34,9 +35,10 @@ export const actions = {
 			return fail(400, { success: false, error: 'All fields marked with an asterisk are required' });
 		}
 
-		const db = {
-			students: await getCollection('students')
-		};
+		const [students] = await Promise.all([
+		getCollection('students')
+	]);
+	const db = { students };
 		const studentIndex = db.students.findIndex(s => s.id === sessionUser.id);
 		if (studentIndex === -1) {
 			return fail(404, { success: false, error: 'Student profile not found' });
@@ -83,9 +85,10 @@ export const actions = {
 			return fail(400, { success: false, error: 'Please provide a valid publicly accessible HTTPS Resume URL' });
 		}
 
-		const db = {
-			students: await getCollection('students')
-		};
+		const [students] = await Promise.all([
+		getCollection('students')
+	]);
+	const db = { students };
 		const studentIndex = db.students.findIndex(s => s.id === sessionUser.id);
 		if (studentIndex === -1) {
 			return fail(404, { success: false, error: 'Student profile not found' });
