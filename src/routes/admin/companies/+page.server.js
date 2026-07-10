@@ -25,7 +25,8 @@ export const actions = {
 		else if (newStatus === 'Approved') updates.isSuspended = false;
 
 		await updateDocument('companies', companyId, updates);
-		await logAction('UPDATE_COMPANY_STATUS', `Admin changed company ${companyId} status to ${newStatus}`);
+		const sessionUser = requireRole(cookies, ['admin']);
+		await logAction('UPDATE_COMPANY_STATUS', `Changed company ${companyId} status to ${newStatus}`, sessionUser.name || 'Admin', 'Admin', sessionUser.email, 'Companies', 'Server');
 		
 		return { success: true };
 	}

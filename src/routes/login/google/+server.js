@@ -5,9 +5,9 @@ import { dev } from '$app/environment';
 
 export async function POST({ request, cookies }) {
 	try {
-		const { email, name, photoURL, role } = await request.json();
+		const { uid, email, name, photoURL, role } = await request.json();
 
-		if (!email || !name || !role) {
+		if (!uid || !email || !name || !role) {
 			return json({ error: 'Missing required Google Auth payload fields.' }, { status: 400 });
 		}
 
@@ -55,7 +55,7 @@ export async function POST({ request, cookies }) {
 			// 2. User does not exist. Auto-register them based on selected role!
 			if (role === 'student') {
 				const newStudent = {
-					id: `stud_${Date.now()}`,
+					id: uid, // Use Firebase UID directly
 					fullName: name,
 					email: email,
 					mobileNumber: '', // Can be filled in profile later
@@ -78,7 +78,7 @@ export async function POST({ request, cookies }) {
 				redirectPath = '/student';
 			} else if (role === 'company') {
 				const newCompany = {
-					id: `comp_${Date.now()}`,
+					id: uid, // Use Firebase UID directly
 					companyName: name, // Using their Google Name as placeholder company name
 					companyEmail: email,
 					companyContactNumber: '',

@@ -60,7 +60,7 @@ export const actions = {
 		};
 
 		await updateEntireDatabase(db);
-		logAction('STUDENT_UPDATE_PROFILE', `Student ${fullName} (${sessionUser.email}) updated profile details.`);
+		logAction('STUDENT_UPDATE_PROFILE', `Updated profile details.`, fullName, 'Student', sessionUser.email, 'Profile', 'Server');
 
 		return { success: true, message: 'Profile details saved successfully' };
 	},
@@ -101,7 +101,7 @@ export const actions = {
 
 		await updateEntireDatabase(db);
 
-		logAction('STUDENT_UPDATE_RESUME', `Student ${db.students[studentIndex].fullName} updated resume URL to ${resumeUrl}.`);
+		logAction('STUDENT_UPDATE_RESUME', `Updated resume URL to ${resumeUrl}.`, db.students[studentIndex].fullName, 'Student', sessionUser.email, 'Resume', 'Server');
 		return { success: true, message: 'Resume URL updated successfully' };
 	}
 };

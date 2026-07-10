@@ -1,7 +1,8 @@
 <script>
+	import { enhance } from '$app/forms';
+
 	let { data } = $props();
-	// svelte-ignore state_referenced_locally
-	let students = $state([...data.students]);
+	const students = $derived(data.students || []);
 	
 	let searchQuery = $state('');
 	let filterTab = $state('All'); // 'All', 'Active', 'Blocked'
@@ -23,17 +24,6 @@
 		})
 	);
 
-	function toggleBlock(id) {
-		// In a real app, this would be an API call
-		students = students.map(s => s.id === id ? { ...s, isSuspended: !s.isSuspended } : s);
-	}
-
-	function deleteStudent(id) {
-		// In a real app, this would be an API call
-		if(confirm('Are you sure you want to delete this student?')) {
-			students = students.filter(s => s.id !== id);
-		}
-	}
 </script>
 
 <div class="space-y-8">
@@ -111,19 +101,36 @@
 									<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Active</span>
 								{/if}
 							</td>
-							<td class="px-6 py-4 text-right space-x-2">
-								<button 
-									onclick={() => toggleBlock(student.id)}
-									class="text-xs font-bold px-3 py-1.5 rounded-lg text-amber-500 hover:bg-amber-500/10 transition cursor-pointer"
+							<td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+								<form
+									action={student.isSuspended ? "?/unsuspendStudent" : "?/suspendStudent"}
+									method="POST"
+									use:enhance
 								>
-									{student.isSuspended ? 'Unblock' : 'Block'}
-								</button>
-								<button 
-									onclick={() => deleteStudent(student.id)}
-									class="text-xs font-bold px-3 py-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition cursor-pointer"
+									<input type="hidden" name="studentId" value={student.id} />
+									<button 
+										type="submit"
+										class="text-xs font-bold px-3 py-1.5 rounded-lg text-amber-500 hover:bg-amber-500/10 transition cursor-pointer"
+										onclick={(e) => !confirm(`${student.isSuspended ? 'Unblock' : 'Block'} ${student.fullName}?`) && e.preventDefault()}
+									>
+										{student.isSuspended ? 'Unblock' : 'Block'}
+									</button>
+								</form>
+								
+								<form
+									action="?/deleteStudent"
+									method="POST"
+									use:enhance
 								>
-									Delete
-								</button>
+									<input type="hidden" name="studentId" value={student.id} />
+									<button 
+										type="submit"
+										class="text-xs font-bold px-3 py-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition cursor-pointer"
+										onclick={(e) => !confirm(`Are you sure you want to permanently delete ${student.fullName}?`) && e.preventDefault()}
+									>
+										Delete
+									</button>
+								</form>
 							</td>
 						</tr>
 					{/each}

@@ -119,7 +119,7 @@ export const actions = {
 		});
 
 		await addDocument('internships', newInternship);
-		await logAction('INTERNSHIP_CREATE', `Company ${company.companyName} posted new internship: "${title}" (ID: ${newInternship.id})`);
+		await logAction('INTERNSHIP_CREATE', `Posted new internship: "${title}" (ID: ${newInternship.id})`, company.companyName, 'Company', company.companyEmail, 'Internships', 'Server');
 
 		return { success: true, message: 'Internship opportunity published successfully' };
 	},
@@ -127,6 +127,11 @@ export const actions = {
 	editInternship: async ({ request, cookies }) => {
 		const sessionUser = requireRole(cookies, ['company']);
 		const company = await getDocument('companies', sessionUser.id);
+
+		// Account approval gate
+		if (company.status !== 'Approved') {
+			return fail(403, { success: false, error: 'Your corporate profile must be approved by an administrator before editing opportunities' });
+		}
 
 		const formData = await request.formData();
 		const id = formData.get('id')?.toString();
@@ -221,13 +226,20 @@ export const actions = {
 		});
 
 		await updateDocument('internships', id, updatedPayload);
-		await logAction('INTERNSHIP_EDIT', `Company ${company.companyName} updated internship details for "${title}" (ID: ${id})`);
+		await logAction('INTERNSHIP_EDIT', `Updated internship details for "${title}" (ID: ${id})`, company.companyName, 'Company', company.companyEmail, 'Internships', 'Server');
 
 		return { success: true, message: 'Internship details updated successfully' };
 	},
 
 	deleteInternship: async ({ request, cookies }) => {
 		const sessionUser = requireRole(cookies, ['company']);
+		const company = await getDocument('companies', sessionUser.id);
+		
+		// Account approval gate
+		if (company.status !== 'Approved') {
+			return fail(403, { success: false, error: 'Your corporate profile must be approved by an administrator before deleting opportunities' });
+		}
+		
 		const formData = await request.formData();
 		const id = formData.get('id')?.toString();
 
@@ -243,13 +255,20 @@ export const actions = {
 
 		const deletedTitle = internship.title;
 		await deleteDocument('internships', id);
-		await logAction('INTERNSHIP_DELETE', `Company ID ${sessionUser.id} deleted internship: "${deletedTitle}" (ID: ${id})`);
+		await logAction('INTERNSHIP_DELETE', `Deleted internship: "${deletedTitle}" (ID: ${id})`, sessionUser.name || 'Company User', 'Company', sessionUser.email, 'Internships', 'Server');
 
 		return { success: true, message: 'Internship posting removed successfully' };
 	},
 
 	archiveInternship: async ({ request, cookies }) => {
 		const sessionUser = requireRole(cookies, ['company']);
+		const company = await getDocument('companies', sessionUser.id);
+		
+		// Account approval gate
+		if (company.status !== 'Approved') {
+			return fail(403, { success: false, error: 'Your corporate profile must be approved by an administrator before archiving opportunities' });
+		}
+		
 		const formData = await request.formData();
 		const id = formData.get('id')?.toString();
 
@@ -264,7 +283,7 @@ export const actions = {
 		}
 
 		await updateDocument('internships', id, { status: 'Archived' });
-		await logAction('INTERNSHIP_ARCHIVE', `Company ID ${sessionUser.id} archived internship: "${internship.title}" (ID: ${id})`);
+		await logAction('INTERNSHIP_ARCHIVE', `Archived internship: "${internship.title}" (ID: ${id})`, sessionUser.name || 'Company User', 'Company', sessionUser.email, 'Internships', 'Server');
 
 		return { success: true, message: 'Internship archived successfully' };
 	}

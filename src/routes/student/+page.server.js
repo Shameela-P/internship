@@ -10,9 +10,19 @@ export async function load({ cookies }) {
 		const student = await getDocument('students', sessionUser.id);
 		if (!student) throw new Error("Student profile not found");
 
+		const rawApps = await queryDocuments('applications', 'studentId', student.id);
+		
+		const stats = {
+			totalApplied: rawApps.length,
+			approvedCount: rawApps.filter(a => a.status === 'Approved').length,
+			pendingCount: rawApps.filter(a => a.status !== 'Approved' && a.status !== 'Rejected').length,
+			certificatesCount: rawApps.filter(a => !!a.certificateHash).length
+		};
+
 		// Defer heavy queries to prevent blocking Vercel SSR rendering
 		return {
 			student,
+			stats,
 			lazy: {
 				applications: (async () => {
 					const rawApps = await queryDocuments('applications', 'studentId', student.id);

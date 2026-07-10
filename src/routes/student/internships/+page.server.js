@@ -168,7 +168,7 @@ export const actions = {
 			})
 		]);
 
-		await logAction('APPLICATION_SUBMIT', `Student ${student.fullName} applied for internship ${internship.title} (ID: ${internship.id}).`);
+		await logAction('APPLICATION_SUBMIT', `Applied for internship ${internship.title} (ID: ${internship.id}).`, student.fullName, 'Student', student.email, 'Internships', 'Server');
 
 		return { success: true };
 	}

@@ -23,6 +23,16 @@
 	{/if}
 </div>
 
+{#if company.status !== 'Approved'}
+	<div class="mb-10 p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-700 flex items-start gap-4">
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+		<div>
+			<h3 class="font-bold text-lg mb-1">Account Under Review</h3>
+			<p class="text-sm font-medium opacity-90">Your corporate profile is currently pending verification by an administrator. You will not be able to post new internships, edit existing ones, or manage applications until your account is approved. We will notify you via email once the review is complete.</p>
+		</div>
+	</div>
+{/if}
+
 {#await data.lazy.dashboardData}
 	<!-- Skeletons for entire Dashboard -->
 	<div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10 animate-pulse">
