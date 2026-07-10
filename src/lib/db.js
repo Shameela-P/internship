@@ -258,11 +258,6 @@ export async function addDocument(collectionName, data) {
     }
     
 	await set(child(dbRef, `${collectionName}/${newIndex}`), data);
-    
-    // Update counts
-    if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
-        await updateCount(collectionName, 1);
-    }
 }
 
 /**
@@ -286,11 +281,6 @@ export async function deleteDocument(collectionName, id) {
 	const index = collection.findIndex(item => item && item.id === id);
 	if (index !== -1) {
 		await remove(child(dbRef, `${collectionName}/${index}`));
-        
-        // Update counts
-        if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
-            await updateCount(collectionName, -1);
-        }
 	}
 }
 
@@ -346,12 +336,6 @@ export async function overwriteEntireDatabase(data) {
  * Fetch database metadata counts dynamically
  */
 export async function getCounts() {
-    const snapshot = await get(child(dbRef, 'metadata/counts'));
-    if (snapshot.exists()) {
-        return snapshot.val();
-    }
-    
-	// Fallback to array lengths if metadata doesn't exist
     const [companies, students, internships, applications] = await Promise.all([
         getCollection('companies'),
         getCollection('students'),
@@ -359,24 +343,12 @@ export async function getCounts() {
         getCollection('applications')
     ]);
 
-    const counts = {
+    return {
         companies: companies.length,
         students: students.length,
         internships: internships.length,
         applications: applications.length
     };
-	await set(child(dbRef, 'metadata/counts'), counts);
-	return counts;
-}
-
-/**
- * Increment or decrement counts in metadata
- */
-export async function updateCount(type, amount) {
-    const counts = await getCounts();
-    counts[type] = (counts[type] || 0) + amount;
-    if (counts[type] < 0) counts[type] = 0;
-    await set(child(dbRef, 'metadata/counts'), counts);
 }
 
 /**
