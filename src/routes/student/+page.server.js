@@ -10,12 +10,28 @@ export async function load({ cookies }) {
 		const student = await getDocument('students', sessionUser.id);
 		if (!student) throw new Error("Student profile not found");
 
-		// Defer heavy queries to prevent blocking Vercel SSR rendering
+		// 2. Fetch raw applications and certificates for accurate live statistics
+		const rawApps = await queryDocuments('applications', 'studentId', student.id) || [];
+		const rawCertificates = await queryDocuments('certificates', 'studentId', student.id) || [];
+
+		// Define status business rules
+		const approvedStatuses = ['Approved', 'Hired', 'Selected', 'Accepted'];
+		const pendingStatuses = ['Pending', 'Under Review', 'Review', 'Shortlisted'];
+
+		// Calculate statistics dynamically
+		const stats = {
+			totalApplied: rawApps.length,
+			approvedCount: rawApps.filter(app => approvedStatuses.includes(app.status)).length,
+			pendingCount: rawApps.filter(app => pendingStatuses.includes(app.status)).length,
+			certificatesCount: rawCertificates.length
+		};
+
+		// Defer heavy relational queries to prevent blocking Vercel SSR rendering
 		return {
 			student,
+			stats,
 			lazy: {
 				applications: (async () => {
-					const rawApps = await queryDocuments('applications', 'studentId', student.id);
 					const internshipIds = [...new Set(rawApps.map(a => a.internshipId))];
 					
 					// Batch fetch matching internship details
