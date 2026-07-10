@@ -104,7 +104,7 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					{#each internships as intern}
 						<div class="p-5 rounded-2xl bg-surface border border-divider hover:border-blue-500/30 transition-colors relative group">
-							<a href="/student/internships?query={encodeURIComponent(intern.title)}" aria-label="View {intern.title} internship" class="absolute inset-0 z-10 rounded-2xl"></a>
+							<a href="/student/internships?query={encodeURIComponent(intern.title)}" aria-label={`View details for ${intern.title}`} class="absolute inset-0 z-10 rounded-2xl"></a>
 							
 							<div class="flex items-start justify-between mb-3">
 								<h4 class="font-bold text-primary text-sm pr-4 group-hover:text-blue-400 transition-colors">{intern.title}</h4>
