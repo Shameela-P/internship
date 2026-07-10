@@ -4,7 +4,7 @@ import { fail } from '@sveltejs/kit';
 import crypto from 'crypto';
 
 export async function load({ cookies }) {
-	const sessionUser = requireRole(cookies, ['company']);
+	const sessionUser = await requireRole(cookies, ['company']);
 
 	// Fetch company profile and their internships using targeted queries
 	const [company, postedInternships] = await Promise.all([
@@ -58,7 +58,7 @@ export async function load({ cookies }) {
 
 export const actions = {
 	updateStatus: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['company']);
+		const sessionUser = await requireRole(cookies, ['company']);
 		const formData = await request.formData();
 		const appId = formData.get('applicationId')?.toString();
 		const newStatus = formData.get('status')?.toString();
@@ -129,7 +129,7 @@ export const actions = {
 	},
 
 	issueCertificate: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['company']);
+		const sessionUser = await requireRole(cookies, ['company']);
 		const formData = await request.formData();
 		const appId = formData.get('applicationId')?.toString();
 

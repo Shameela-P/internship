@@ -3,7 +3,7 @@ import { getDocument, queryDocuments } from '$lib/db';
 import { redirect } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
-	const sessionUser = requireRole(cookies, ['student']);
+	const sessionUser = await requireRole(cookies, ['student']);
 
 	// Fetch only the student document directly — no full collection scan
 	const student = await getDocument('students', sessionUser.id);

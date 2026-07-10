@@ -33,6 +33,7 @@
 					email: user.email,
 					name: user.displayName,
 					photoURL: user.photoURL,
+					uid: user.uid,
 					role: googleRole
 				})
 			});

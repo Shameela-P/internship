@@ -4,7 +4,7 @@ import { error } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
 	try {
-		const sessionUser = requireRole(cookies, ['company']);
+		const sessionUser = await requireRole(cookies, ['company']);
 		
 		// 1. Fetch Company Profile directly (critical layout/config data)
 		const company = await getDocument('companies', sessionUser.id);

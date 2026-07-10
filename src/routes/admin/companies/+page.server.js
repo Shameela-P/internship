@@ -2,7 +2,7 @@ import { logAction, getCollection, updateDocument } from '$lib/db';
 import { requireRole } from '$lib/auth';
 
 export async function load({ cookies }) {
-	requireRole(cookies, ['admin']);
+	await requireRole(cookies, ['admin']);
 	const companiesData = await getCollection('companies');
 
 	// Reverse to show newest first
@@ -15,7 +15,7 @@ export async function load({ cookies }) {
 
 export const actions = {
 	updateStatus: async ({ request, cookies }) => {
-		requireRole(cookies, ['admin']);
+		await requireRole(cookies, ['admin']);
 		const data = await request.formData();
 		const companyId = data.get('companyId');
 		const newStatus = data.get('status');

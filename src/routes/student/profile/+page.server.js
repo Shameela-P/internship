@@ -3,7 +3,7 @@ import { requireRole } from '$lib/auth';
 import { fail } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
-	const sessionUser = requireRole(cookies, ['student']);
+	const sessionUser = await requireRole(cookies, ['student']);
 	const db = {
 		students: await getCollection('students')
 	};
@@ -15,7 +15,7 @@ export async function load({ cookies }) {
 
 export const actions = {
 	updateProfile: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['student']);
+		const sessionUser = await requireRole(cookies, ['student']);
 		const formData = await request.formData();
 
 		const fullName = formData.get('fullName')?.toString().trim();
@@ -66,7 +66,7 @@ export const actions = {
 	},
 
 	updateResume: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['student']);
+		const sessionUser = await requireRole(cookies, ['student']);
 		const formData = await request.formData();
 		const resumeUrl = formData.get('resumeUrl')?.toString().trim();
 

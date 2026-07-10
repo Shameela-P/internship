@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { redirect } from '@sveltejs/kit';
+import { getDocument } from '$lib/db';
 import { env } from '$env/dynamic/private';
 import { dev } from '$app/environment';
 
@@ -87,7 +88,7 @@ export function verifyToken(token, isRefresh = false) {
 }
 
 // Authenticate session from request cookies
-export function getSessionUser(cookies) {
+export async function getSessionUser(cookies) {
 	const sessionCookie = cookies.get('nexora_session');
 	let user = verifyToken(sessionCookie);
 	
@@ -107,13 +108,27 @@ export function getSessionUser(cookies) {
 			});
 		}
 	}
+
+	if (user) {
+		// Perform live check against DB
+		if (user.role === 'student') {
+			const student = await getDocument('students', user.id);
+			if (!student || student.isSuspended || student.isBlocked) return null;
+		} else if (user.role === 'company') {
+			const company = await getDocument('companies', user.id);
+			if (!company || company.isSuspended) return null;
+		}
+	}
+
 	return user;
 }
 
 // SvelteKit Route guard helper
-export function requireRole(cookies, allowedRoles) {
-	const user = getSessionUser(cookies);
+export async function requireRole(cookies, allowedRoles) {
+	const user = await getSessionUser(cookies);
 	if (!user) {
+		cookies.delete('nexora_session', { path: '/' });
+		cookies.delete('nexora_refresh', { path: '/' });
 		throw redirect(303, '/login');
 	}
 	if (!allowedRoles.includes(user.role)) {

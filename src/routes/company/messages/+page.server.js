@@ -3,7 +3,7 @@ import { requireRole } from '$lib/auth';
 import { fail } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
-	const sessionUser = requireRole(cookies, ['company']);
+	const sessionUser = await requireRole(cookies, ['company']);
 	const [studentsData, companiesData, internshipsData, applicationsData, messagesData] = await Promise.all([
 		getCollection('students'),
 		getCollection('companies'),
@@ -67,7 +67,7 @@ export async function load({ cookies }) {
 
 export const actions = {
 	sendMessage: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['company']);
+		const sessionUser = await requireRole(cookies, ['company']);
 		const companies = await getCollection('companies');
 		const company = companies.find(c => c.id === sessionUser.id);
 

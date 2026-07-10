@@ -269,8 +269,9 @@ export async function getCachedCompanies() {
  * Add a new item to an array collection.
  */
 export async function addDocument(collectionName, data) {
-    // Determine count to append
-    const snap = await get(child(dbRef, collectionName));
+    // Determine count to append by only fetching the very last item in the collection!
+    const dbQuery = query(child(dbRef, collectionName), limitToLast(1));
+    const snap = await get(dbQuery);
     let newIndex = 0;
     if (snap.exists()) {
         const val = snap.val();
@@ -279,12 +280,22 @@ export async function addDocument(collectionName, data) {
     }
     
 	await set(child(dbRef, `${collectionName}/${newIndex}`), data);
+<<<<<<< Updated upstream
 	invalidateCache(collectionName);
     
     // Update counts
     if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
         await updateCount(collectionName, 1);
     }
+=======
+	
+	// Increment metadata count
+	if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
+		const countSnap = await get(child(dbRef, `metadata/counts/${collectionName}`));
+		const currentCount = countSnap.exists() ? countSnap.val() : 0;
+		await set(child(dbRef, `metadata/counts/${collectionName}`), currentCount + 1);
+	}
+>>>>>>> Stashed changes
 }
 
 /**
@@ -309,7 +320,17 @@ export async function deleteDocument(collectionName, id) {
 	const index = collection.findIndex(item => item && item.id === id);
 	if (index !== -1) {
 		await remove(child(dbRef, `${collectionName}/${index}`));
+<<<<<<< Updated upstream
 		invalidateCache(collectionName);
+=======
+		
+		// Decrement metadata count
+		if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
+			const countSnap = await get(child(dbRef, `metadata/counts/${collectionName}`));
+			const currentCount = countSnap.exists() ? countSnap.val() : 1;
+			await set(child(dbRef, `metadata/counts/${collectionName}`), Math.max(0, currentCount - 1));
+		}
+>>>>>>> Stashed changes
 	}
 }
 
@@ -367,6 +388,7 @@ export async function overwriteEntireDatabase(data) {
  * Fetch database metadata counts
  */
 export async function getCounts() {
+<<<<<<< Updated upstream
     const snapshot = await get(child(dbRef, 'metadata/counts'));
     if (snapshot.exists()) {
         return snapshot.val();
@@ -382,6 +404,29 @@ export async function updateCount(type, amount) {
     counts[type] = (counts[type] || 0) + amount;
     if (counts[type] < 0) counts[type] = 0;
     await set(child(dbRef, 'metadata/counts'), counts);
+=======
+	const snap = await get(child(dbRef, 'metadata/counts'));
+	if (snap.exists()) {
+		return snap.val();
+	}
+
+	// Fallback to array lengths if metadata doesn't exist
+    const [companies, students, internships, applications] = await Promise.all([
+        getCollection('companies'),
+        getCollection('students'),
+        getCollection('internships'),
+        getCollection('applications')
+    ]);
+
+    const counts = {
+        companies: companies.length,
+        students: students.length,
+        internships: internships.length,
+        applications: applications.length
+    };
+	await set(child(dbRef, 'metadata/counts'), counts);
+	return counts;
+>>>>>>> Stashed changes
 }
 
 /**
@@ -449,16 +494,8 @@ export async function logAction(action, details, user = 'System', role = 'System
 		timestamp: new Date().toISOString()
 	};
 	
-	// Instead of getting the whole collection, just append and rely on a cron or limit logic later if needed
-    // But since it's an array, we must fetch the length or just use getPaginated to manage.
-    // For now, we'll fetch only the last 50, prepend, and overwrite the array from start (not ideal for scale)
-    // Actually, writing directly with push/append is better, but since it's an array based schema:
-	const logs = await getPaginated('systemLogs', 50);
-	logs.unshift(newLog);
-	if (logs.length > 50) {
-		logs.length = 50; // truncate
-	}
-	await set(child(dbRef, 'systemLogs'), logs);
+	// Add directly to systemLogs without loading the entire array
+	await addDocument('systemLogs', newLog);
 }
 
 // Ensure Mock resumes exist on disk locally for tests/downloads (Vercel won't persist this, but needed for dev)

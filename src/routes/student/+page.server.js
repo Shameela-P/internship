@@ -4,7 +4,7 @@ import { error } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
 	try {
-		const sessionUser = requireRole(cookies, ['student']);
+		const sessionUser = await requireRole(cookies, ['student']);
 		
 		// 1. Fetch Student Profile directly (critical config data)
 		const student = await getDocument('students', sessionUser.id);

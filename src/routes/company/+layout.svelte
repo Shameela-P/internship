@@ -83,14 +83,16 @@
 				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
 				Overview
 			</a>
-			<a href="/company/internships" class={getLinkClass('/company/internships')}>
-				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-				Postings ({company.status === 'Approved' ? 'Manage' : 'View'})
-			</a>
-			<a href="/company/applications" class={getLinkClass('/company/applications')}>
-				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-				Applications Queue
-			</a>
+			{#if company.status === 'Approved'}
+				<a href="/company/internships" class={getLinkClass('/company/internships')}>
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+					Manage Postings
+				</a>
+				<a href="/company/applications" class={getLinkClass('/company/applications')}>
+					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+					Applications Queue
+				</a>
+			{/if}
 			<a href="/company/messages" class={getLinkClass('/company/messages')}>
 				<div class="relative flex items-center gap-3 w-full">
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -176,8 +178,10 @@
 			<div class="w-64 h-full bg-white border-r border-slate-200 p-4 space-y-2 flex flex-col justify-between" onclick={(e) => e.stopPropagation()}>
 				<nav class="space-y-1">
 					<a href="/company" class={getLinkClass('/company')} onclick={toggleMobileMenu}>Overview</a>
-					<a href="/company/internships" class={getLinkClass('/company/internships')} onclick={toggleMobileMenu}>Postings</a>
-					<a href="/company/applications" class={getLinkClass('/company/applications')} onclick={toggleMobileMenu}>Applications Queue</a>
+					{#if company.status === 'Approved'}
+						<a href="/company/internships" class={getLinkClass('/company/internships')} onclick={toggleMobileMenu}>Postings</a>
+						<a href="/company/applications" class={getLinkClass('/company/applications')} onclick={toggleMobileMenu}>Applications Queue</a>
+					{/if}
 					<a href="/company/messages" class={getLinkClass('/company/messages')} onclick={toggleMobileMenu}>Chat Messages</a>
 					<a href="/company/notifications" class={getLinkClass('/company/notifications')} onclick={toggleMobileMenu}>Notifications</a>
 				</nav>

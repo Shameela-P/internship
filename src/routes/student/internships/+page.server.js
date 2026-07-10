@@ -3,7 +3,7 @@ import { requireRole } from '$lib/auth';
 import { fail } from '@sveltejs/kit';
 
 export async function load({ cookies, url }) {
-	const sessionUser = requireRole(cookies, ['student']);
+	const sessionUser = await requireRole(cookies, ['student']);
 
 	const student = await getDocument('students', sessionUser.id);
 	if (!student) {
@@ -99,7 +99,7 @@ export async function load({ cookies, url }) {
 
 export const actions = {
 	apply: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['student']);
+		const sessionUser = await requireRole(cookies, ['student']);
 		const formData = await request.formData();
 		const internshipId = formData.get('internshipId')?.toString();
 

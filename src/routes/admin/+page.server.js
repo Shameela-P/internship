@@ -4,7 +4,7 @@ import { fail, error } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
 	try {
-		const sessionUser = requireRole(cookies, ['admin']);
+		const sessionUser = await requireRole(cookies, ['admin']);
 		
 		// Return admin profile synchronously, but defer heavy listings/stats
 		return {
@@ -59,7 +59,7 @@ export async function load({ cookies }) {
 export const actions = {
 	approveCompany: async ({ request, cookies }) => {
 		try {
-			const sessionUser = requireRole(cookies, ['admin']);
+			const sessionUser = await requireRole(cookies, ['admin']);
 			const data = await request.formData();
 			const companyId = data.get('companyId')?.toString();
 
@@ -76,7 +76,7 @@ export const actions = {
 	},
 	rejectCompany: async ({ request, cookies }) => {
 		try {
-			const sessionUser = requireRole(cookies, ['admin']);
+			const sessionUser = await requireRole(cookies, ['admin']);
 			const data = await request.formData();
 			const companyId = data.get('companyId')?.toString();
 
@@ -93,7 +93,7 @@ export const actions = {
 	},
 	suspendCompany: async ({ request, cookies }) => {
 		try {
-			const sessionUser = requireRole(cookies, ['admin']);
+			const sessionUser = await requireRole(cookies, ['admin']);
 			const data = await request.formData();
 			const companyId = data.get('companyId')?.toString();
 
@@ -110,7 +110,7 @@ export const actions = {
 	},
 	unsuspendCompany: async ({ request, cookies }) => {
 		try {
-			const sessionUser = requireRole(cookies, ['admin']);
+			const sessionUser = await requireRole(cookies, ['admin']);
 			const data = await request.formData();
 			const companyId = data.get('companyId')?.toString();
 

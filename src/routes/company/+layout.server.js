@@ -2,8 +2,8 @@ import { requireRole } from '$lib/auth';
 import { getDocument, queryDocuments } from '$lib/db';
 import { redirect } from '@sveltejs/kit';
 
-export async function load({ cookies }) {
-	const sessionUser = requireRole(cookies, ['company']);
+export async function load({ cookies, url }) {
+	const sessionUser = await requireRole(cookies, ['company']);
 	
 	// Fetch only the company document directly — no full collection scan
 	const company = await getDocument('companies', sessionUser.id);
@@ -16,6 +16,14 @@ export async function load({ cookies }) {
 	if (company.isSuspended) {
 		cookies.delete('nexora_session', { path: '/' });
 		throw redirect(303, '/login');
+	}
+
+	// Enforce Pending Approval Workflow
+	if (company.status === 'Pending') {
+		const restrictedPaths = ['/company/internships', '/company/applications'];
+		if (restrictedPaths.some(p => url.pathname.startsWith(p))) {
+			throw redirect(303, '/company');
+		}
 	}
 
 	// Defer unread counts to prevent blocking page render

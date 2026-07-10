@@ -2,7 +2,7 @@ import { getCollection, updateEntireDatabase } from '$lib/db';
 import { requireRole } from '$lib/auth';
 
 export async function load({ cookies }) {
-	const sessionUser = requireRole(cookies, ['company']);
+	const sessionUser = await requireRole(cookies, ['company']);
 	const [companiesData, notificationsData] = await Promise.all([
 		getCollection('companies'),
 		getCollection('notifications')

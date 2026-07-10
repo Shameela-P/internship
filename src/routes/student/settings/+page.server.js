@@ -3,7 +3,7 @@ import { requireRole, verifyPassword, hashPassword } from '$lib/auth';
 import { fail } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
-	const sessionUser = requireRole(cookies, ['student']);
+	const sessionUser = await requireRole(cookies, ['student']);
 	const [studentsData] = await Promise.all([
 		getCollection('students')
 	]);
@@ -27,7 +27,7 @@ export async function load({ cookies }) {
 
 export const actions = {
 	changePassword: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['student']);
+		const sessionUser = await requireRole(cookies, ['student']);
 		const formData = await request.formData();
 		
 		const currentPassword = formData.get('currentPassword')?.toString();
@@ -70,7 +70,7 @@ export const actions = {
 	},
 
 	updatePreferences: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['student']);
+		const sessionUser = await requireRole(cookies, ['student']);
 		const formData = await request.formData();
 
 		const emailNotifications = formData.get('emailNotifications') === 'true';

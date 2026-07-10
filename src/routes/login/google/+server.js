@@ -1,33 +1,29 @@
 import { json } from '@sveltejs/kit';
-import { getCollection, updateDocument, addDocument, logAction } from '$lib/db';
+import { updateDocument, addDocument, logAction, queryDocumentsPaginated } from '$lib/db';
 import { createToken } from '$lib/auth';
 import { dev } from '$app/environment';
 
 export async function POST({ request, cookies }) {
 	try {
-		const { email, name, photoURL, role } = await request.json();
+		const { email, name, photoURL, uid, role } = await request.json();
 
-		if (!email || !name || !role) {
+		if (!email || !name || !role || !uid) {
 			return json({ error: 'Missing required Google Auth payload fields.' }, { status: 400 });
 		}
 
-		const [studentsData, companiesData, adminsData] = await Promise.all([
-			getCollection('students'),
-			getCollection('companies'),
-			getCollection('admins')
-		]);
-		const db = {
-			students: studentsData,
-			companies: companiesData,
-			admins: adminsData
-		};
 		let user = null;
 		let redirectPath = '/';
 
-		// 1. Check if user already exists anywhere in the DB
-		const existingStudent = db.students.find(s => s.email === email);
-		const existingCompany = db.companies.find(c => c.companyEmail === email);
-		const existingAdmin = db.admins.find(a => a.email === email);
+		// 1. Check if user already exists using targeted query to prevent stale cache issues
+		const [studentsData, companiesData, adminsData] = await Promise.all([
+			queryDocumentsPaginated('students', 'email', email, 1),
+			queryDocumentsPaginated('companies', 'companyEmail', email, 1),
+			queryDocumentsPaginated('admins', 'email', email, 1)
+		]);
+
+		const existingStudent = studentsData[0];
+		const existingCompany = companiesData[0];
+		const existingAdmin = adminsData[0];
 
 		if (existingAdmin) {
 			user = { id: existingAdmin.id, role: 'admin', email };
@@ -55,11 +51,11 @@ export async function POST({ request, cookies }) {
 			// 2. User does not exist. Auto-register them based on selected role!
 			if (role === 'student') {
 				const newStudent = {
-					id: `stud_${Date.now()}`,
+					id: uid, // Use Firebase Auth UID
 					fullName: name,
 					email: email,
-					mobileNumber: '', // Can be filled in profile later
-					password: '', // No password since Google Auth
+					mobileNumber: '', 
+					password: '', 
 					collegeName: 'Update Profile',
 					degreeCourse: 'Update Profile',
 					department: 'Update Profile',
@@ -78,8 +74,8 @@ export async function POST({ request, cookies }) {
 				redirectPath = '/student';
 			} else if (role === 'company') {
 				const newCompany = {
-					id: `comp_${Date.now()}`,
-					companyName: name, // Using their Google Name as placeholder company name
+					id: uid, // Use Firebase Auth UID
+					companyName: name,
 					companyEmail: email,
 					companyContactNumber: '',
 					website: '',
@@ -87,7 +83,7 @@ export async function POST({ request, cookies }) {
 					companyDescription: 'Update Profile',
 					industryType: 'Software & IT',
 					companyLogo: photoURL || '',
-					password: '', // No password since Google Auth
+					password: '', 
 					status: 'Pending', // Pending admin approval
 					isSuspended: false,
 					createdAt: new Date().toISOString()

@@ -3,7 +3,7 @@ import { requireRole } from '$lib/auth';
 import { error } from '@sveltejs/kit';
 
 export async function load({ cookies, params }) {
-	const sessionUser = requireRole(cookies, ['student', 'admin']);
+	const sessionUser = await requireRole(cookies, ['student', 'admin']);
 	const companyId = params.id;
 
 	const [companies, internships] = await Promise.all([

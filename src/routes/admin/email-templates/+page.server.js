@@ -2,7 +2,7 @@ import { getCollection } from '$lib/db';
 import { requireRole } from '$lib/auth';
 
 export async function load({ cookies }) {
-	requireRole(cookies, ['admin']);
+	await requireRole(cookies, ['admin']);
 	const [emailTemplatesData] = await Promise.all([
 		getCollection('emailTemplates')
 	]);

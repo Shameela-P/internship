@@ -7,8 +7,8 @@
 	let filterTab = $state('All'); // 'All', 'Active', 'Blocked'
 
 	const totalStudents = $derived(students.length);
-	const activeAccounts = $derived(students.filter(s => !s.isSuspended).length);
-	const blockedAccounts = $derived(students.filter(s => s.isSuspended).length);
+	const activeAccounts = $derived(students.filter(s => !s.isBlocked).length);
+	const blockedAccounts = $derived(students.filter(s => s.isBlocked).length);
 
 	const filteredStudents = $derived(
 		students.filter(s => {
@@ -16,24 +16,15 @@
 								  s.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
 								  s.collegeName.toLowerCase().includes(searchQuery.toLowerCase());
 			
-			if (filterTab === 'Active' && s.isSuspended) return false;
-			if (filterTab === 'Blocked' && !s.isSuspended) return false;
+			if (filterTab === 'Active' && s.isBlocked) return false;
+			if (filterTab === 'Blocked' && !s.isBlocked) return false;
 			
 			return matchesSearch;
 		})
 	);
 
-	function toggleBlock(id) {
-		// In a real app, this would be an API call
-		students = students.map(s => s.id === id ? { ...s, isSuspended: !s.isSuspended } : s);
-	}
-
-	function deleteStudent(id) {
-		// In a real app, this would be an API call
-		if(confirm('Are you sure you want to delete this student?')) {
-			students = students.filter(s => s.id !== id);
-		}
-	}
+	import { enhance } from '$app/forms';
+	let loadingId = $state(null);
 </script>
 
 <div class="space-y-8">
@@ -105,25 +96,53 @@
 							<td class="px-6 py-4 text-slate-600">{student.collegeName}</td>
 							<td class="px-6 py-4 text-slate-600">{student.department}</td>
 							<td class="px-6 py-4">
-								{#if student.isSuspended}
+								{#if student.isBlocked}
 									<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">Blocked</span>
 								{:else}
 									<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Active</span>
 								{/if}
 							</td>
-							<td class="px-6 py-4 text-right space-x-2">
-								<button 
-									onclick={() => toggleBlock(student.id)}
-									class="text-xs font-bold px-3 py-1.5 rounded-lg text-amber-500 hover:bg-amber-500/10 transition cursor-pointer"
-								>
-									{student.isSuspended ? 'Unblock' : 'Block'}
-								</button>
-								<button 
-									onclick={() => deleteStudent(student.id)}
-									class="text-xs font-bold px-3 py-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition cursor-pointer"
-								>
-									Delete
-								</button>
+							<td class="px-6 py-4 text-right">
+								<div class="flex items-center justify-end gap-2">
+									<form method="POST" action="?/toggleBlock" use:enhance={() => {
+										loadingId = student.id + '-block';
+										return async ({ update }) => {
+											loadingId = null;
+											update({ reset: false });
+										};
+									}}>
+										<input type="hidden" name="studentId" value={student.id} />
+										<button 
+											disabled={loadingId !== null}
+											class="text-xs font-bold px-3 py-1.5 rounded-lg text-amber-500 hover:bg-amber-500/10 transition cursor-pointer disabled:opacity-50"
+										>
+											{#if loadingId === student.id + '-block'}
+												<span class="h-3 w-3 border-2 border-amber-300 border-t-amber-500 rounded-full animate-spin inline-block align-middle mr-1"></span>
+											{/if}
+											{student.isBlocked ? 'Unblock' : 'Block'}
+										</button>
+									</form>
+									
+									<form method="POST" action="?/deleteStudent" use:enhance={({ cancel }) => {
+										if(!confirm('Are you sure you want to delete this student?')) cancel();
+										loadingId = student.id + '-delete';
+										return async ({ update }) => {
+											loadingId = null;
+											update({ reset: false });
+										};
+									}}>
+										<input type="hidden" name="studentId" value={student.id} />
+										<button 
+											disabled={loadingId !== null}
+											class="text-xs font-bold px-3 py-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition cursor-pointer disabled:opacity-50"
+										>
+											{#if loadingId === student.id + '-delete'}
+												<span class="h-3 w-3 border-2 border-rose-300 border-t-rose-500 rounded-full animate-spin inline-block align-middle mr-1"></span>
+											{/if}
+											Delete
+										</button>
+									</form>
+								</div>
 							</td>
 						</tr>
 					{/each}

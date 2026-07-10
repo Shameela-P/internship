@@ -6,7 +6,7 @@ import fs from 'fs';
 import path from 'path';
 
 export async function load({ cookies }) {
-	const sessionUser = requireRole(cookies, ['company']);
+	const sessionUser = await requireRole(cookies, ['company']);
 	
 	// Optimized: fetch company profile and their internships using targeted queries
 	const [company, companyInternships] = await Promise.all([
@@ -23,7 +23,7 @@ export async function load({ cookies }) {
 
 export const actions = {
 	postInternship: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['company']);
+		const sessionUser = await requireRole(cookies, ['company']);
 		const company = await getDocument('companies', sessionUser.id);
 
 		// Account approval gate
@@ -125,7 +125,7 @@ export const actions = {
 	},
 
 	editInternship: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['company']);
+		const sessionUser = await requireRole(cookies, ['company']);
 		const company = await getDocument('companies', sessionUser.id);
 
 		const formData = await request.formData();
@@ -227,7 +227,7 @@ export const actions = {
 	},
 
 	deleteInternship: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['company']);
+		const sessionUser = await requireRole(cookies, ['company']);
 		const formData = await request.formData();
 		const id = formData.get('id')?.toString();
 
@@ -249,7 +249,7 @@ export const actions = {
 	},
 
 	archiveInternship: async ({ request, cookies }) => {
-		const sessionUser = requireRole(cookies, ['company']);
+		const sessionUser = await requireRole(cookies, ['company']);
 		const formData = await request.formData();
 		const id = formData.get('id')?.toString();
 
