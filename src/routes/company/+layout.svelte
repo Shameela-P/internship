@@ -11,9 +11,10 @@
 	let unread = $state(0);
 	let unreadMsgs = $state(0);
 	let unsubscribeMsgs = null;
+	let unsubscribeNotifs = null;
 
 	$effect(() => {
-		if (data.lazy) {
+		if (data.lazy && unsubscribeNotifs === null) {
 			data.lazy.unreadNotifications.then(val => unread = val);
 		}
 	});
@@ -39,12 +40,34 @@
 					unreadMsgs = 0;
 				}
 			});
+
+			const notifsRef = ref(db, 'notifications');
+			unsubscribeNotifs = onValue(notifsRef, (snapshot) => {
+				const val = snapshot.val();
+				if (val) {
+					let allNotifs = [];
+					if (Array.isArray(val)) {
+						allNotifs = val.filter(Boolean);
+					} else if (typeof val === 'object') {
+						allNotifs = Object.values(val).filter(Boolean);
+					}
+					
+					unread = allNotifs.filter(n => 
+						n.recipientEmail.toLowerCase() === company.companyEmail.toLowerCase() && !n.read
+					).length;
+				} else {
+					unread = 0;
+				}
+			});
 		}
 	});
 
 	onDestroy(() => {
 		if (unsubscribeMsgs) {
 			unsubscribeMsgs();
+		}
+		if (unsubscribeNotifs) {
+			unsubscribeNotifs();
 		}
 	});
 

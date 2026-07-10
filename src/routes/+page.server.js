@@ -47,7 +47,7 @@ export async function load({ cookies }) {
 			activeInternships: counts.internships,
 			registeredCompanies: counts.companies,
 			totalStudents: counts.students,
-			successfulPlacements: Math.floor(counts.applications * 0.1) // Estimated successful placements
+			successfulPlacements: counts.successfulPlacements || 0
 		},
 		featured,
 		categories

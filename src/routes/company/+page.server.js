@@ -16,12 +16,7 @@ export async function load({ cookies }) {
 			lazy: {
 				dashboardData: (async () => {
 					const postedInternships = await queryDocuments('internships', 'companyId', company.id);
-					const internshipIds = postedInternships.map(i => i.id);
-
-					// Query applications for these specific internships concurrently
-					const applicationsPromises = internshipIds.map(id => queryDocuments('applications', 'internshipId', id));
-					const applicationsResults = await Promise.all(applicationsPromises);
-					let companyApps = applicationsResults.flat();
+					let companyApps = await queryDocuments('applications', 'companyId', company.id);
 
 					// Resolve Student Profiles for these applications
 					const studentIds = [...new Set(companyApps.map(a => a.studentId))];

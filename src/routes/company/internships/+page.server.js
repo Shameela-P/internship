@@ -1,4 +1,4 @@
-import { logAction, DOMAINS, getDocument, queryDocuments, updateDocument, addDocument, deleteDocument } from '$lib/db';
+import { logAction, DOMAINS, getDocument, queryDocuments, updateDocument, addDocument, deleteDocument, queryDocumentsPaginated } from '$lib/db';
 import { requireRole } from '$lib/auth';
 import { buildInternshipPayload } from '$lib/internship-utils';
 import { fail } from '@sveltejs/kit';
@@ -252,6 +252,35 @@ export const actions = {
 		}
 
 		const deletedTitle = internship.title;
+		
+		// Check for existing applications
+		const existingApps = await queryDocumentsPaginated('applications', 'internshipId', id, 1);
+		
+		if (existingApps.length > 0) {
+			// Soft delete / archive instead
+			await updateDocument('internships', id, { status: 'Archived' });
+			await logAction('INTERNSHIP_ARCHIVE', `Company ID ${sessionUser.id} auto-archived internship due to existing applications: "${deletedTitle}" (ID: ${id})`);
+			
+			// Notify all applicants
+			const allApps = await queryDocuments('applications', 'internshipId', id);
+			const studentIds = [...new Set(allApps.map(a => a.studentId))];
+			const students = await Promise.all(studentIds.map(sid => getDocument('students', sid)));
+			
+			for (const student of students.filter(Boolean)) {
+				await addDocument('notifications', {
+					id: `notif_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+					recipientEmail: student.email,
+					recipientRole: 'student',
+					subject: `Update on your application: ${deletedTitle}`,
+					body: `Hi ${student.fullName},\n\nThe internship opportunity "${deletedTitle}" you applied for has been archived or removed by the company. Your application history is still preserved.\n\nBest,\nNexora Team`,
+					date: new Date().toISOString(),
+					read: false
+				});
+			}
+
+			return { success: true, message: 'Internship has been archived instead of deleted because applications exist to preserve history.' };
+		}
+
 		await deleteDocument('internships', id);
 		await logAction('INTERNSHIP_DELETE', `Company ID ${sessionUser.id} deleted internship: "${deletedTitle}" (ID: ${id})`);
 
@@ -281,6 +310,24 @@ export const actions = {
 
 		await updateDocument('internships', id, { status: 'Archived' });
 		await logAction('INTERNSHIP_ARCHIVE', `Company ID ${sessionUser.id} archived internship: "${internship.title}" (ID: ${id})`);
+
+		// Notify all applicants
+		const allApps = await queryDocuments('applications', 'internshipId', id);
+		const studentIds = [...new Set(allApps.map(a => a.studentId))];
+		const students = await Promise.all(studentIds.map(sid => getDocument('students', sid)));
+		
+		const notifications = students.filter(Boolean).map(student => {
+			return addDocument('notifications', {
+				id: `notif_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+				recipientEmail: student.email,
+				recipientRole: 'student',
+				subject: `Update on your application: ${internship.title}`,
+				body: `Hi ${student.fullName},\n\nThe internship opportunity "${internship.title}" you applied for has been archived by the company. Your application history is still preserved.\n\nBest,\nNexora Team`,
+				date: new Date().toISOString(),
+				read: false
+			});
+		});
+		await Promise.all(notifications);
 
 		return { success: true, message: 'Internship archived successfully' };
 	}

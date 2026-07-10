@@ -1,4 +1,4 @@
-import { logAction, DOMAINS, getDocument, getCollection, addDocument, queryDocumentsPaginated, getPaginated } from '$lib/db';
+import { logAction, DOMAINS, getDocument, getCollection, addDocument, queryDocumentsPaginated, getPaginated, updateDocument } from '$lib/db';
 import { requireRole } from '$lib/auth';
 import { fail } from '@sveltejs/kit';
 
@@ -37,8 +37,21 @@ export async function load({ cookies, url }) {
 	const companyMap = new Map(companiesData.map(c => [c.id, c]));
 
 	// Filter internships
+	const now = new Date();
+	const expiredIds = [];
+
 	const filteredInternships = internshipsData
 		.filter(internship => {
+			// Check for automatic expiration based on date
+			if (internship.lastDateToApply) {
+				const deadline = new Date(internship.lastDateToApply);
+				deadline.setHours(23, 59, 59, 999);
+				if (now > deadline) {
+					expiredIds.push(internship.id);
+					return false;
+				}
+			}
+
 			// Only show active postings
 			if (internship.status !== 'Active') return false;
 
@@ -79,6 +92,15 @@ export async function load({ cookies, url }) {
 				hasApplied: appliedSet.has(internship.id)
 			};
 		});
+
+	// Fire background updates for expired internships to keep Firebase synced without blocking response
+	if (expiredIds.length > 0) {
+		expiredIds.forEach(id => {
+			updateDocument('internships', id, { status: 'Expired' }).catch(err => {
+				console.error(`Failed to background expire internship ${id}`, err);
+			});
+		});
+	}
 
 	return {
 		student,
@@ -137,7 +159,11 @@ export const actions = {
 		const newApp = {
 			id: `app_${Date.now()}`,
 			studentId: student.id,
+			studentName: student.fullName,
+			companyId: company.id,
+			companyName: company.companyName,
 			internshipId: internship.id,
+			internshipTitle: internship.title,
 			status: 'Pending',
 			appliedDate: new Date().toISOString(),
 			actionDate: '',
@@ -145,28 +171,28 @@ export const actions = {
 			certificateHash: ''
 		};
 
-		// Add application and both notifications concurrently
-		await Promise.all([
-			addDocument('applications', newApp),
-			addDocument('notifications', {
-				id: `notif_${Date.now()}_stud`,
-				recipientEmail: student.email,
-				recipientRole: 'student',
-				subject: `Application Filed: ${internship.title}`,
-				body: `Hi ${student.fullName},\n\nYour application for "${internship.title}" at ${company.companyName} has been successfully submitted.\n\nWe'll notify you when the company reviews your application.\n\nBest of luck!\nNexora Team`,
-				date: new Date().toISOString(),
-				read: false
-			}),
-			addDocument('notifications', {
-				id: `notif_${Date.now()}_comp`,
-				recipientEmail: company.companyEmail,
-				recipientRole: 'company',
-				subject: `New Application Received: ${internship.title}`,
-				body: `Dear HR Team,\n\nA new student application has been submitted for your opening: "${internship.title}".\n\nApplicant: ${student.fullName}\nCollege: ${student.collegeName}\nDepartment: ${student.department}\n\nPlease log into Nexora to review their profile and resume.\n\nBest regards,\nNexora Recruiting Services`,
-				date: new Date().toISOString(),
-				read: false
-			})
-		]);
+		// Add application and both notifications sequentially to prevent race conditions on array index creation
+		await addDocument('applications', newApp);
+		
+		await addDocument('notifications', {
+			id: `notif_${Date.now()}_stud`,
+			recipientEmail: student.email,
+			recipientRole: 'student',
+			subject: `Application Filed: ${internship.title}`,
+			body: `Hi ${student.fullName},\n\nYour application for "${internship.title}" at ${company.companyName} has been successfully submitted.\n\nWe'll notify you when the company reviews your application.\n\nBest of luck!\nNexora Team`,
+			date: new Date().toISOString(),
+			read: false
+		});
+		
+		await addDocument('notifications', {
+			id: `notif_${Date.now()}_comp`,
+			recipientEmail: company.companyEmail,
+			recipientRole: 'company',
+			subject: `New Application Received: ${internship.title}`,
+			body: `Dear HR Team,\n\nA new student application has been submitted for your opening: "${internship.title}".\n\nApplicant: ${student.fullName}\nCollege: ${student.collegeName}\nDepartment: ${student.department}\n\nPlease log into Nexora to review their profile and resume.\n\nBest regards,\nNexora Recruiting Services`,
+			date: new Date().toISOString(),
+			read: false
+		});
 
 		await logAction('APPLICATION_SUBMIT', `Student ${student.fullName} applied for internship ${internship.title} (ID: ${internship.id}).`);
 

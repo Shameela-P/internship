@@ -12,11 +12,7 @@ export async function load({ cookies }) {
 		queryDocuments('internships', 'companyId', sessionUser.id)
 	]);
 
-	const internshipIds = postedInternships.map(i => i.id);
-
-	// Fetch applications for this company's internships concurrently
-	const applicationsNested = await Promise.all(internshipIds.map(id => queryDocuments('applications', 'internshipId', id)));
-	const rawApps = applicationsNested.flat();
+	const rawApps = await queryDocuments('applications', 'companyId', sessionUser.id);
 
 	// Resolve unique students
 	const studentIds = [...new Set(rawApps.map(a => a.studentId))];

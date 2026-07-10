@@ -184,6 +184,21 @@ export const actions = {
 			date: new Date().toISOString(),
 			read: false
 		});
+
+		const allAdmins = await getCollection('admins');
+		const adminNotifications = allAdmins.map(admin => {
+			return addDocument('notifications', {
+				id: `notif_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+				recipientEmail: admin.email,
+				recipientRole: 'admin',
+				subject: `New Company Registration: ${companyName}`,
+				body: `A new company "${companyName}" has registered and is pending approval. Please review their profile in the admin dashboard.`,
+				date: new Date().toISOString(),
+				read: false
+			});
+		});
+		await Promise.all(adminNotifications);
+
 		logAction('COMPANY_REGISTER', `New company ${companyName} (${companyEmail}) submitted for approval.`);
 
 		throw redirect(303, '/login?registered=true');

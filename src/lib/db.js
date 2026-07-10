@@ -222,15 +222,10 @@ export async function getCollection(collectionName) {
 
 	let snapshot;
 	try {
+        // Cache the whole collection. Since indexing isn't set up in Firebase Rules, 
+        // we need to hold the whole collection in memory to search by 'id'.
+        // This is safe since the max size is ~6,000 documents (~3MB) which Node handles easily.
         let dbQuery = child(dbRef, collectionName);
-        
-        // Safety guard: prevent fetching entire massive collections at once if using getCollection directly
-        const massiveCollections = ['internships', 'companies', 'students', 'applications', 'notifications', 'messages', 'systemLogs'];
-        if (massiveCollections.includes(collectionName)) {
-            console.warn(`WARNING: getCollection('${collectionName}') called on a large collection. Limiting to 500 records to prevent OOM/timeouts. Use getPaginated() or queryDocumentsPaginated() instead.`);
-            dbQuery = query(child(dbRef, collectionName), limitToLast(500));
-        }
-
 		snapshot = await Promise.race([get(dbQuery), timeout]);
 	} catch (err) {
 		console.error(`getCollection('${collectionName}') failed:`, err.message);
@@ -393,11 +388,22 @@ export async function getCounts() {
 		return 0;
 	};
 
+	const getSuccessfulApps = (snap) => {
+		if (!snap.exists()) return 0;
+		const data = snap.val();
+		const approvedStatuses = ['Approved', 'Hired', 'Selected', 'Accepted'];
+		let apps = [];
+		if (Array.isArray(data)) apps = data.filter(i => i !== null);
+		else if (typeof data === 'object') apps = Object.values(data).filter(i => i !== null);
+		return apps.filter(app => approvedStatuses.includes(app.status)).length;
+	};
+
 	countsCache = {
 		companies: getLen(compSnap),
 		students: getLen(studSnap),
 		internships: getLen(intSnap),
-		applications: getLen(appSnap)
+		applications: getLen(appSnap),
+		successfulPlacements: getSuccessfulApps(appSnap)
 	};
 	countsTimestamp = now;
 
@@ -442,9 +448,8 @@ export async function queryDocumentsPaginated(collectionName, field, value, limi
     } catch (e) {
         console.warn(`Query failed for ${collectionName} on ${field} === ${value}. Error: ${e.message || e}. Falling back to manual filter...`);
         try {
-            // Fallback: fetch latest limited records (or full if small) to filter manually
-            const fallbackLimit = 500; 
-            const data = await getPaginated(collectionName, fallbackLimit);
+            // Fallback: fetch the full collection (cached) to filter manually
+            const data = await getCollection(collectionName);
             return data.filter(item => item && item[field] === value).slice(0, limit);
         } catch (fallbackError) {
             console.error(`Fallback failed for ${collectionName}:`, fallbackError);
