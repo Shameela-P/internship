@@ -3,16 +3,17 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 import { getStorage } from 'firebase/storage';
 import { env } from '$env/dynamic/public';
+import { building } from '$app/environment';
 
 const firebaseConfig = {
-	apiKey: env.PUBLIC_FIREBASE_API_KEY?.trim(),
-	authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN?.trim(),
+	apiKey: env.PUBLIC_FIREBASE_API_KEY?.trim() || (building ? 'mock-api-key' : ''),
+	authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN?.trim() || (building ? 'mock-auth-domain' : ''),
 	databaseURL: 'https://internship-7f490-default-rtdb.firebaseio.com',
-	projectId: env.PUBLIC_FIREBASE_PROJECT_ID?.trim(),
-	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET?.trim(),
-	messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim(),
-	appId: env.PUBLIC_FIREBASE_APP_ID?.trim(),
-	measurementId: env.PUBLIC_FIREBASE_MEASUREMENT_ID?.trim()
+	projectId: env.PUBLIC_FIREBASE_PROJECT_ID?.trim() || (building ? 'mock-project-id' : ''),
+	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET?.trim() || (building ? 'mock-bucket' : ''),
+	messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim() || (building ? 'mock-sender' : ''),
+	appId: env.PUBLIC_FIREBASE_APP_ID?.trim() || (building ? 'mock-app-id' : ''),
+	measurementId: env.PUBLIC_FIREBASE_MEASUREMENT_ID?.trim() || (building ? 'mock-measurement-id' : '')
 };
 console.log("[VERCEL BUILD] Firebase Config Init:", { ...firebaseConfig, apiKey: 'HIDDEN' });
 
