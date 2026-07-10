@@ -8,13 +8,9 @@ export async function load({ cookies }) {
 	// Fetch only the company document directly — no full collection scan
 	const company = await getDocument('companies', sessionUser.id);
 
-	if (!company) {
+	if (!company || company.isSuspended) {
 		cookies.delete('nexora_session', { path: '/' });
-		throw redirect(303, '/login');
-	}
-
-	if (company.isSuspended) {
-		cookies.delete('nexora_session', { path: '/' });
+		cookies.delete('nexora_refresh', { path: '/' });
 		throw redirect(303, '/login');
 	}
 

@@ -8,8 +8,9 @@ export async function load({ cookies }) {
 	// Fetch only the student document directly — no full collection scan
 	const student = await getDocument('students', sessionUser.id);
 
-	if (!student) {
+	if (!student || student.isBlocked) {
 		cookies.delete('nexora_session', { path: '/' });
+		cookies.delete('nexora_refresh', { path: '/' });
 		throw redirect(303, '/login');
 	}
 
