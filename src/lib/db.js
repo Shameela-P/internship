@@ -280,22 +280,14 @@ export async function addDocument(collectionName, data) {
     }
     
 	await set(child(dbRef, `${collectionName}/${newIndex}`), data);
-<<<<<<< Updated upstream
 	invalidateCache(collectionName);
-    
-    // Update counts
-    if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
-        await updateCount(collectionName, 1);
-    }
-=======
-	
+
 	// Increment metadata count
 	if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
 		const countSnap = await get(child(dbRef, `metadata/counts/${collectionName}`));
 		const currentCount = countSnap.exists() ? countSnap.val() : 0;
 		await set(child(dbRef, `metadata/counts/${collectionName}`), currentCount + 1);
 	}
->>>>>>> Stashed changes
 }
 
 /**
@@ -320,9 +312,7 @@ export async function deleteDocument(collectionName, id) {
 	const index = collection.findIndex(item => item && item.id === id);
 	if (index !== -1) {
 		await remove(child(dbRef, `${collectionName}/${index}`));
-<<<<<<< Updated upstream
 		invalidateCache(collectionName);
-=======
 		
 		// Decrement metadata count
 		if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
@@ -330,7 +320,6 @@ export async function deleteDocument(collectionName, id) {
 			const currentCount = countSnap.exists() ? countSnap.val() : 1;
 			await set(child(dbRef, `metadata/counts/${collectionName}`), Math.max(0, currentCount - 1));
 		}
->>>>>>> Stashed changes
 	}
 }
 
@@ -388,23 +377,6 @@ export async function overwriteEntireDatabase(data) {
  * Fetch database metadata counts
  */
 export async function getCounts() {
-<<<<<<< Updated upstream
-    const snapshot = await get(child(dbRef, 'metadata/counts'));
-    if (snapshot.exists()) {
-        return snapshot.val();
-    }
-    return { companies: 0, students: 0, internships: 0, applications: 0 };
-}
-
-/**
- * Increment or decrement counts in metadata
- */
-export async function updateCount(type, amount) {
-    const counts = await getCounts();
-    counts[type] = (counts[type] || 0) + amount;
-    if (counts[type] < 0) counts[type] = 0;
-    await set(child(dbRef, 'metadata/counts'), counts);
-=======
 	const snap = await get(child(dbRef, 'metadata/counts'));
 	if (snap.exists()) {
 		return snap.val();
@@ -426,7 +398,6 @@ export async function updateCount(type, amount) {
     };
 	await set(child(dbRef, 'metadata/counts'), counts);
 	return counts;
->>>>>>> Stashed changes
 }
 
 /**
