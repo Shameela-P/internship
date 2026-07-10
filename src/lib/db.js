@@ -192,9 +192,15 @@ export function invalidateCache(collectionName = null) {
 	if (collectionName) {
 		delete cache[collectionName];
 		delete cacheTimestamps[collectionName];
+		if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
+			countsCache = null;
+			countsTimestamp = 0;
+		}
 	} else {
 		cache = {};
 		cacheTimestamps = {};
+		countsCache = null;
+		countsTimestamp = 0;
 	}
 }
 
@@ -281,13 +287,6 @@ export async function addDocument(collectionName, data) {
     
 	await set(child(dbRef, `${collectionName}/${newIndex}`), data);
 	invalidateCache(collectionName);
-	
-	// Increment metadata count
-	if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
-		const countSnap = await get(child(dbRef, `metadata/counts/${collectionName}`));
-		const currentCount = countSnap.exists() ? countSnap.val() : 0;
-		await set(child(dbRef, `metadata/counts/${collectionName}`), currentCount + 1);
-	}
 }
 
 /**
@@ -313,13 +312,6 @@ export async function deleteDocument(collectionName, id) {
 	if (index !== -1) {
 		await remove(child(dbRef, `${collectionName}/${index}`));
 		invalidateCache(collectionName);
-		
-		// Decrement metadata count
-		if (['companies', 'students', 'internships', 'applications'].includes(collectionName)) {
-			const countSnap = await get(child(dbRef, `metadata/counts/${collectionName}`));
-			const currentCount = countSnap.exists() ? countSnap.val() : 1;
-			await set(child(dbRef, `metadata/counts/${collectionName}`), Math.max(0, currentCount - 1));
-		}
 	}
 }
 
@@ -373,31 +365,43 @@ export async function overwriteEntireDatabase(data) {
 	invalidateCache();
 }
 
+let countsCache = null;
+let countsTimestamp = 0;
+
 /**
- * Fetch database metadata counts
+ * Fetch database metadata counts dynamically
  */
 export async function getCounts() {
-	const snap = await get(child(dbRef, 'metadata/counts'));
-	if (snap.exists()) {
-		return snap.val();
+	const now = Date.now();
+	if (countsCache && (now - countsTimestamp < CACHE_DURATION)) {
+		return countsCache;
 	}
 
-	// Fallback to array lengths if metadata doesn't exist
-    const [companies, students, internships, applications] = await Promise.all([
-        getCollection('companies'),
-        getCollection('students'),
-        getCollection('internships'),
-        getCollection('applications')
-    ]);
+	// Fetch full data for accurate counts directly (bypassing getCollection limit)
+	const [compSnap, studSnap, intSnap, appSnap] = await Promise.all([
+		get(child(dbRef, 'companies')),
+		get(child(dbRef, 'students')),
+		get(child(dbRef, 'internships')),
+		get(child(dbRef, 'applications'))
+	]);
 
-    const counts = {
-        companies: companies.length,
-        students: students.length,
-        internships: internships.length,
-        applications: applications.length
-    };
-	await set(child(dbRef, 'metadata/counts'), counts);
-	return counts;
+	const getLen = (snap) => {
+		if (!snap.exists()) return 0;
+		const data = snap.val();
+		if (Array.isArray(data)) return data.filter(i => i !== null).length;
+		if (typeof data === 'object') return Object.values(data).filter(i => i !== null).length;
+		return 0;
+	};
+
+	countsCache = {
+		companies: getLen(compSnap),
+		students: getLen(studSnap),
+		internships: getLen(intSnap),
+		applications: getLen(appSnap)
+	};
+	countsTimestamp = now;
+
+	return countsCache;
 }
 
 /**

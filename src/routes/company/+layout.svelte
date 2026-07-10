@@ -191,7 +191,17 @@
 	<!-- Content Area -->
 	<div class="grow md:ml-64 p-6 md:p-10 min-h-screen relative flex flex-col">
 		<div class="max-w-6xl w-full mx-auto grow flex flex-col">
-			{@render children()}
+			{#if data.pendingApproval}
+				<div class="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white border border-amber-200 rounded-3xl shadow-sm mb-auto mt-20 max-w-lg mx-auto">
+					<div class="h-16 w-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-6">
+						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+					</div>
+					<h2 class="text-2xl font-bold font-display text-slate-900 mb-2">Account Awaiting Approval</h2>
+					<p class="text-sm text-slate-500 mb-4">Your company account is currently pending admin verification. You will be able to access the employer dashboard and post internships once approved.</p>
+				</div>
+			{:else}
+				{@render children()}
+			{/if}
 		</div>
 	</div>
 </div>

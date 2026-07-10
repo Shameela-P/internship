@@ -184,7 +184,7 @@
 
 				<div>
 					<label for="skills" class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Skills Required (Comma Separated) *</label>
-					<input type="text" id="skills" name="skills" required value={student.skills.join(', ')} placeholder="React, Python, Accounting" class="w-full px-3 py-2.5 rounded-lg border border-divider bg-slate-955 text-sm text-primary focus:outline-none focus:border-blue-500" />
+					<input type="text" id="skills" name="skills" required value={(student.skills || []).join(', ')} placeholder="React, Python, Accounting" class="w-full px-3 py-2.5 rounded-lg border border-divider bg-slate-955 text-sm text-primary focus:outline-none focus:border-blue-500" />
 					<span class="text-[10px] text-slate-500 mt-1 block">Specify key skills. The recommendation engine matches internships based on these tags.</span>
 				</div>
 

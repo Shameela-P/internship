@@ -128,6 +128,10 @@ export const actions = {
 		const sessionUser = requireRole(cookies, ['company']);
 		const company = await getDocument('companies', sessionUser.id);
 
+		if (company.status !== 'Approved') {
+			return fail(403, { success: false, error: 'Your corporate profile must be approved before modifying postings' });
+		}
+
 		const formData = await request.formData();
 		const id = formData.get('id')?.toString();
 		const title = formData.get('title')?.toString().trim();
@@ -228,6 +232,12 @@ export const actions = {
 
 	deleteInternship: async ({ request, cookies }) => {
 		const sessionUser = requireRole(cookies, ['company']);
+		const company = await getDocument('companies', sessionUser.id);
+		
+		if (company.status !== 'Approved') {
+			return fail(403, { success: false, error: 'Your corporate profile must be approved before modifying postings' });
+		}
+		
 		const formData = await request.formData();
 		const id = formData.get('id')?.toString();
 
@@ -250,6 +260,12 @@ export const actions = {
 
 	archiveInternship: async ({ request, cookies }) => {
 		const sessionUser = requireRole(cookies, ['company']);
+		const company = await getDocument('companies', sessionUser.id);
+		
+		if (company.status !== 'Approved') {
+			return fail(403, { success: false, error: 'Your corporate profile must be approved before modifying postings' });
+		}
+		
 		const formData = await request.formData();
 		const id = formData.get('id')?.toString();
 
