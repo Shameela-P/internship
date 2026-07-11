@@ -11,6 +11,7 @@ Students can explore opportunities, apply for internships, and monitor their app
 ## Features
 
 ### Student
+
 - Registration
 - Login
 - Google Sign-In
@@ -23,6 +24,7 @@ Students can explore opportunities, apply for internships, and monitor their app
 - Profile Management
 
 ### Company
+
 - Registration
 - Company Approval
 - Internship Posting
@@ -33,6 +35,7 @@ Students can explore opportunities, apply for internships, and monitor their app
 - Dashboard
 
 ### Administrator
+
 - Dashboard
 - Student Management
 - Company Approval
@@ -43,14 +46,14 @@ Students can explore opportunities, apply for internships, and monitor their app
 
 ## Technology Stack
 
-| Layer | Technology |
-| --- | --- |
-| Frontend | SvelteKit |
-| Backend | SvelteKit API |
-| Database | Firebase Realtime Database |
-| Authentication | Firebase Authentication |
-| Styling | Tailwind CSS |
-| Hosting | Vercel |
+| Layer          | Technology                 |
+| -------------- | -------------------------- |
+| Frontend       | SvelteKit                  |
+| Backend        | SvelteKit API              |
+| Database       | Firebase Realtime Database |
+| Authentication | Firebase Authentication    |
+| Styling        | Tailwind CSS               |
+| Hosting        | Vercel                     |
 
 ## Prerequisites
 
@@ -68,7 +71,7 @@ npm install
 
 ## Environment Variables
 
-Create a `.env` file in the root of the project with the following keys. 
+Create a `.env` file in the root of the project with the following keys.
 
 ```env
 PUBLIC_FIREBASE_API_KEY=
@@ -83,11 +86,13 @@ PUBLIC_FIREBASE_APP_ID=
 ## Running the Project
 
 To start the development server, run:
+
 ```bash
 npm run dev
 ```
 
 To start the development server and automatically open the application in your default browser:
+
 ```bash
 npm run dev -- --open
 ```
@@ -95,11 +100,13 @@ npm run dev -- --open
 ## Production Build
 
 To build the application for production:
+
 ```bash
 npm run build
 ```
 
 To preview the built production application locally:
+
 ```bash
 npm run preview
 ```
@@ -144,7 +151,7 @@ tests/
 
 ## Deployment
 
-This project is configured for deployment on Vercel using the `@sveltejs/adapter-vercel` adapter. 
+This project is configured for deployment on Vercel using the `@sveltejs/adapter-vercel` adapter.
 
 1. Push your code to a remote repository (e.g., GitHub).
 2. Import the project in your Vercel dashboard.
