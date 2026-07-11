@@ -94,6 +94,10 @@ export const actions = {
 
 		const newInternship = buildInternshipPayload({
 			companyId: company.id,
+			companyName: company.companyName,
+			companyLogo: company.companyLogo || '',
+			companyDomain: company.website || '',
+			companyStatus: company.status,
 			bannerPath,
 			formValues: {
 				title,
@@ -199,6 +203,10 @@ export const actions = {
 
 		const updatedPayload = buildInternshipPayload({
 			companyId: company.id,
+			companyName: company.companyName,
+			companyLogo: company.companyLogo || '',
+			companyDomain: company.website || '',
+			companyStatus: company.status,
 			bannerPath,
 			existingId: id,
 			formValues: {

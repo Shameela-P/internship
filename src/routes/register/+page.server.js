@@ -158,8 +158,13 @@ export const actions = {
 			industryType,
 			companyLogo,
 			password: hashPassword(password),
-			status: 'Approved', // Auto-approved for immediate visibility
+			status: 'Pending',
+			approved: false,
+			canPostInternships: false,
 			isSuspended: false,
+			submittedAt: new Date().toISOString(),
+			approvedAt: null,
+			approvedBy: null,
 			createdAt: new Date().toISOString()
 		};
 

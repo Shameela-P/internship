@@ -5,16 +5,23 @@ export function normalizeSkills(skillsRaw = '') {
 		.filter(Boolean);
 }
 
-export function buildInternshipPayload({ companyId, formValues, bannerPath = '', existingId = null }) {
+export function buildInternshipPayload({ companyId, companyName, companyLogo, companyDomain, companyStatus, formValues, bannerPath = '', existingId = null }) {
 	const normalizedType = formValues.type?.toString() ?? '';
 	const fee = Number.parseFloat(formValues.fee?.toString() || '0');
 	const stipendAmount = Number.parseFloat(formValues.stipendAmount?.toString() || '0');
 	const openings = Number.parseInt(formValues.openings?.toString() || '1', 10);
 	const safeOpenings = Number.isNaN(openings) || openings < 1 ? 1 : openings;
 
+	const id = existingId || `intern_${Date.now()}`;
+
 	return {
-		...(existingId ? { id: existingId } : { id: `intern_${Date.now()}` }),
+		id,
+		internshipId: id,
 		companyId,
+		companyName: companyName || '',
+		companyLogo: companyLogo || '',
+		companyDomain: companyDomain || '',
+		companyStatus: companyStatus || 'Approved',
 		title: formValues.title?.toString().trim() ?? '',
 		domain: formValues.domain?.toString() ?? '',
 		subCategory: formValues.subCategory?.toString().trim() ?? '',

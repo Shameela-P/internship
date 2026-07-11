@@ -150,6 +150,18 @@
 	</button>
 </div>
 
+{#if company.status === 'Pending'}
+	<div class="mb-8 p-6 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+		<div class="h-12 w-12 rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+		</div>
+		<div>
+			<h3 class="text-amber-800 font-bold text-lg">Waiting for Admin Approval</h3>
+			<p class="text-amber-700/80 text-sm mt-1">Your company profile is under review. You will be able to publish internships after approval.</p>
+		</div>
+	</div>
+{/if}
+
 <!-- Errors display -->
 {#if form?.error}
 	<div class="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold flex items-center gap-2">

@@ -15,14 +15,23 @@ export async function load({ cookies }) {
 
 export const actions = {
 	updateStatus: async ({ request, cookies }) => {
-		requireRole(cookies, ['admin']);
+		const sessionUser = requireRole(cookies, ['admin']);
 		const data = await request.formData();
 		const companyId = data.get('companyId');
 		const newStatus = data.get('status');
 
 		const updates = { status: newStatus };
-		if (newStatus === 'Suspended') updates.isSuspended = true;
-		else if (newStatus === 'Approved') updates.isSuspended = false;
+		if (newStatus === 'Suspended' || newStatus === 'Rejected') {
+			updates.isSuspended = newStatus === 'Suspended';
+			updates.approved = false;
+			updates.canPostInternships = false;
+		} else if (newStatus === 'Approved') {
+			updates.isSuspended = false;
+			updates.approved = true;
+			updates.canPostInternships = true;
+			updates.approvedAt = new Date().toISOString();
+			updates.approvedBy = sessionUser.id;
+		}
 
 		const company = await getDocument('companies', companyId);
 

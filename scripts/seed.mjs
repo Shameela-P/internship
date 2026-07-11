@@ -243,6 +243,8 @@ function generateCompany(index) {
 	const statusRoll = rand(1, 10);
 	const status = statusRoll <= 7 ? 'Approved' : statusRoll <= 9 ? 'Pending' : 'Rejected';
 	const isSuspended = status === 'Approved' && rand(1, 20) === 1; // 5% chance
+	const approved = status === 'Approved';
+	const canPostInternships = status === 'Approved' && !isSuspended;
 
 	const emailDomains = ['gmail.com', 'company.com', 'corp.in', 'solutions.io', 'tech.co', 'group.in', 'ventures.com'];
 	const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 12);
@@ -259,6 +261,8 @@ function generateCompany(index) {
 		companyLogo: '',
 		password: hashPassword('company123'),
 		status,
+		approved,
+		canPostInternships,
 		isSuspended: isSuspended,
 		createdAt: dateAgo(rand(30, 730))
 	};
@@ -286,7 +290,12 @@ function generateInternship(company, internshipIndex) {
 
 	return {
 		id,
+		internshipId: id,
 		companyId: company.id,
+		companyName: company.companyName,
+		companyLogo: company.companyLogo,
+		companyDomain: company.website,
+		companyStatus: company.status,
 		title: pick(jobTitles),
 		domain,
 		skillsRequired: selectedSkills,
