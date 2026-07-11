@@ -34,6 +34,9 @@
 		:global(.print-section), :global(.print-section *) {
 			visibility: visible;
 		}
+		:global(body) {
+			background: white !important;
+		}
 		.print-section {
 			position: absolute;
 			left: 0;
@@ -42,10 +45,22 @@
 			border: none !important;
 			box-shadow: none !important;
 			background: white !important;
-			color: black !important;
+			-webkit-print-color-adjust: exact !important;
+			print-color-adjust: exact !important;
 		}
 		.no-print {
 			display: none !important;
+		}
+		/* Fix text-gradient turning invisible when printed */
+		:global(.text-gradient) {
+			-webkit-text-fill-color: initial !important;
+			background: none !important;
+			color: #d97706 !important; /* amber-600 */
+		}
+		/* Ensure watermark is faint when printed */
+		:global(.watermark-text) {
+			color: #f8fafc !important; /* slate-50 */
+			opacity: 0.5 !important;
 		}
 	}
 </style>
@@ -94,7 +109,7 @@
 			<div class="absolute bottom-0 right-0 w-20 h-20 border-b-4 border-r-4 border-amber-500/20"></div>
 			
 			<!-- Subtle Watermark Seal -->
-			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-display font-black text-[100px] text-slate-100 pointer-events-none tracking-widest leading-none rotate-[20deg] select-none uppercase">
+			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-display font-black text-[100px] text-slate-100 pointer-events-none tracking-widest leading-none rotate-[20deg] select-none uppercase watermark-text">
 				Nexora
 			</div>
 
