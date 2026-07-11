@@ -186,10 +186,10 @@
 	);
 </script>
 
-<div class="grow flex flex-col md:flex-row h-[78vh] rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
+<div class="grow flex flex-col md:flex-row h-[calc(100dvh-120px)] md:h-[78vh] rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
 	
 	<!-- Conversations Sidebar -->
-	<div class="w-full md:w-80 border-r border-slate-200 bg-slate-50 flex flex-col justify-between shrink-0">
+	<div class="{activeEmail ? 'hidden md:flex' : 'flex'} w-full md:w-80 border-r border-slate-200 bg-slate-50 flex-col justify-between shrink-0">
 		<div class="flex flex-col h-full">
 			<div class="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
 				<h2 class="font-display font-bold text-lg text-slate-900">Inbox</h2>
@@ -239,11 +239,14 @@
 	</div>
 
 	<!-- Main Chat Panel -->
-	<div class="grow flex flex-col bg-white">
+	<div class="{activeEmail ? 'flex' : 'hidden md:flex'} grow flex-col bg-white min-w-0 min-h-0">
 		{#if activeEmail}
 			<!-- Header -->
-			<div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+			<div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
 				<div class="flex items-center gap-3">
+					<button onclick={() => activeEmail = null} class="md:hidden p-2 -ml-2 rounded-lg text-slate-500 hover:bg-slate-200 transition" aria-label="Back to inbox">
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+					</button>
 					<div class="h-10 w-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
 						{activeThread?.name?.charAt(0) || activeEmail.charAt(0).toUpperCase()}
 					</div>
@@ -259,7 +262,7 @@
 			<!-- Message Thread list -->
 			<div 
 				bind:this={chatContainer}
-				class="grow p-6 overflow-y-auto space-y-4 bg-white"
+				class="grow p-6 overflow-y-auto space-y-4 bg-white min-h-0"
 			>
 				{#if activeMessages.length === 0}
 					<div class="h-full flex flex-col items-center justify-center text-center p-8">
@@ -290,7 +293,7 @@
 			</div>
 
 			<!-- Footer Input field -->
-			<div class="p-4 border-t border-slate-200 bg-slate-50">
+			<div class="p-4 border-t border-slate-200 bg-slate-50 shrink-0">
 				<form
 					action="?/sendMessage"
 					method="POST"
@@ -332,7 +335,7 @@
 				</form>
 			</div>
 		{:else}
-			<div class="grow flex flex-col items-center justify-center text-center p-8 bg-slate-50/50">
+			<div class="hidden md:flex grow flex-col items-center justify-center text-center p-8 bg-slate-50/50">
 				<div class="h-12 w-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
 				</div>
