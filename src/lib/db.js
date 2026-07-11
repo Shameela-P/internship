@@ -288,26 +288,76 @@ export async function addDocument(collectionName, data) {
  * Update an existing item in a collection.
  */
 export async function updateDocument(collectionName, id, updates) {
-	const collection = await getCollection(collectionName);
-	const index = collection.findIndex(item => item && item.id === id);
-	if (index !== -1) {
-		collection[index] = { ...collection[index], ...updates };
-		// Partial update using index
-		await set(child(dbRef, `${collectionName}/${index}`), collection[index]);
-		invalidateCache(collectionName);
-	}
+    try {
+        const dbQuery = query(child(dbRef, collectionName), orderByChild('id'), equalTo(id));
+        const snapshot = await get(dbQuery);
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const key = Object.keys(data)[0];
+            const existingData = data[key] || {};
+            const mergedData = { ...existingData, ...updates };
+            await update(child(dbRef, `${collectionName}/${key}`), mergedData);
+            invalidateCache(collectionName);
+            return;
+        }
+    } catch (e) {
+        // Fallback for missing index
+    }
+
+    // Fallback: Manual scan
+    const allDataSnap = await get(child(dbRef, collectionName));
+    if (allDataSnap.exists()) {
+        const allData = allDataSnap.val();
+        let keyToUpdate = null;
+        if (Array.isArray(allData)) {
+            keyToUpdate = allData.findIndex(item => item && item.id === id);
+        } else if (typeof allData === 'object') {
+            keyToUpdate = Object.keys(allData).find(key => allData[key] && allData[key].id === id);
+        }
+        
+        if (keyToUpdate !== null && keyToUpdate !== -1) {
+            const existingData = allData[keyToUpdate] || {};
+            const mergedData = { ...existingData, ...updates };
+            await update(child(dbRef, `${collectionName}/${keyToUpdate}`), mergedData);
+            invalidateCache(collectionName);
+        }
+    }
 }
 
 /**
  * Delete an item from a collection
  */
 export async function deleteDocument(collectionName, id) {
-	const collection = await getCollection(collectionName);
-	const index = collection.findIndex(item => item && item.id === id);
-	if (index !== -1) {
-		await remove(child(dbRef, `${collectionName}/${index}`));
-		invalidateCache(collectionName);
-	}
+    try {
+        const dbQuery = query(child(dbRef, collectionName), orderByChild('id'), equalTo(id));
+        const snapshot = await get(dbQuery);
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const key = Object.keys(data)[0];
+            await remove(child(dbRef, `${collectionName}/${key}`));
+            invalidateCache(collectionName);
+            return;
+        }
+    } catch (e) {
+        // Fallback for missing index
+    }
+
+    // Fallback: Manual scan
+    const allDataSnap = await get(child(dbRef, collectionName));
+    if (allDataSnap.exists()) {
+        const allData = allDataSnap.val();
+        let keyToDelete = null;
+        if (Array.isArray(allData)) {
+            keyToDelete = allData.findIndex(item => item && item.id === id);
+        } else if (typeof allData === 'object') {
+            keyToDelete = Object.keys(allData).find(key => allData[key] && allData[key].id === id);
+        }
+        
+        if (keyToDelete !== null && keyToDelete !== -1) {
+            await remove(child(dbRef, `${collectionName}/${keyToDelete}`));
+            invalidateCache(collectionName);
+        }
+    }
 }
 
 /**
@@ -450,7 +500,7 @@ export async function queryDocumentsPaginated(collectionName, field, value, limi
         try {
             // Fallback: fetch the full collection (cached) to filter manually
             const data = await getCollection(collectionName);
-            return data.filter(item => item && item[field] === value).slice(0, limit);
+            return data.filter(item => item && item[field] === value).reverse().slice(0, limit);
         } catch (fallbackError) {
             console.error(`Fallback failed for ${collectionName}:`, fallbackError);
             return [];

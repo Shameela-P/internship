@@ -1,4 +1,4 @@
-import { logAction, DOMAINS, getDocument, getCollection, addDocument, queryDocumentsPaginated, getPaginated, updateDocument } from '$lib/db';
+import { logAction, DOMAINS, getDocument, getCollection, addDocument, queryDocuments, queryDocumentsPaginated, getPaginated, updateDocument } from '$lib/db';
 import { requireRole } from '$lib/auth';
 import { fail } from '@sveltejs/kit';
 
@@ -144,8 +144,8 @@ export const actions = {
 			return fail(400, { success: false, error: 'The company hosting this internship has been suspended' });
 		}
 
-		// Check for duplicate application using targeted query
-		const existingApps = await queryDocumentsPaginated('applications', 'studentId', student.id, 100);
+		// Fetch ALL applications for the student to robustly check for duplicates
+		const existingApps = await queryDocuments('applications', 'studentId', student.id);
         const hasApplied = existingApps.some(a => a.internshipId === internship.id);
 		if (hasApplied) {
 			return fail(400, { success: false, error: 'You have already applied to this internship' });
