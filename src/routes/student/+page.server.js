@@ -61,7 +61,7 @@ export async function load({ cookies }) {
 				recommendations: (async () => {
 					// Use a paginated query to get a slice of active internships for recommendations
 					const activeInternships = await queryDocumentsPaginated('internships', 'status', 'Active', 50);
-					const studentSkills = student.skills.map(s => s.toLowerCase());
+					const studentSkills = (student.skills || []).map(s => s.toLowerCase());
 					
 					const recommendationsPromises = activeInternships.slice(0, 100).map(async internship => {
 						const company = await getDocument('companies', internship.companyId);
