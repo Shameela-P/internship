@@ -1,6 +1,6 @@
-import { getCollection, addDocument, updateDocument } from '$lib/db';
+import { getCollection, getDocument, queryDocumentsPaginated, addDocument, updateDocument } from '$lib/db';
 import { requireRole } from '$lib/auth';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
 	const sessionUser = requireRole(cookies, ['student']);
