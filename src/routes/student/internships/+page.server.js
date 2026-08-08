@@ -3,126 +3,140 @@ import { requireRole } from '$lib/auth';
 import { fail, redirect } from '@sveltejs/kit';
 
 export async function load({ cookies, url }) {
-	const sessionUser = requireRole(cookies, ['student']);
+	try {
+		const sessionUser = requireRole(cookies, ['student']);
 
-	const student = await getDocument('students', sessionUser.id);
-	if (!student) {
-		cookies.delete('nexora_session', { path: '/' });
-		throw redirect(303, '/login');
-	}
-
-	// Get filter parameters from URL query string
-	const searchQuery = url.searchParams.get('query')?.toLowerCase().trim() || '';
-	const filterCompanyId = url.searchParams.get('companyId') || '';
-	const filterDomain = url.searchParams.get('domain') || '';
-	const filterLocation = url.searchParams.get('location')?.toLowerCase().trim() || '';
-	const filterMode = url.searchParams.get('mode') || '';
-	const filterType = url.searchParams.get('type') || '';
-	const filterDuration = url.searchParams.get('duration') || '';
-	const filterJobOpp = url.searchParams.get('jobOpportunity') || '';
-	const filterCert = url.searchParams.get('certificateAvailable') || '';
-
-	// Use paginated query instead of loading the entire database for search, but increase limit to allow searching the expanded dataset
-	let internshipsData;
-	if (filterCompanyId) {
-		internshipsData = await queryDocuments('internships', 'companyId', filterCompanyId);
-	} else {
-		internshipsData = await queryDocumentsPaginated('internships', 'status', 'Active', 2000);
-	}
-    
-    // Batch fetch only needed companies
-    const companyIds = [...new Set(internshipsData.map(i => i.companyId))];
-    const companiesData = await Promise.all(companyIds.map(id => getDocument('companies', id)));
-
-	// Get student's existing applications (targeted query)
-	const rawApps = await queryDocumentsPaginated('applications', 'studentId', student.id, 100);
-	const studentApps = rawApps.map(a => a.internshipId);
-	const appliedSet = new Set(studentApps);
-
-	// Map company profiles for quick lookup
-	const companyMap = new Map(companiesData.map(c => [c.id, c]));
-
-	// Filter internships
-	const now = new Date();
-	const expiredIds = [];
-
-	const filteredInternships = internshipsData
-		.filter(internship => {
-			// Check for automatic expiration based on date
-			if (internship.lastDateToApply) {
-				const deadline = new Date(internship.lastDateToApply);
-				deadline.setHours(23, 59, 59, 999);
-				if (now > deadline) {
-					expiredIds.push(internship.id);
-					return false;
-				}
-			}
-
-			// Only show active postings
-			if (internship.status !== 'Active') return false;
-
-			const company = companyMap.get(internship.companyId);
-			// Exclude unapproved or suspended company listings
-			if (!company || company.isSuspended || company.status !== 'Approved') return false;
-
-			// Search query (titles, description, skills, company name)
-			if (searchQuery) {
-				const queryTokens = searchQuery.split(/\s+/).filter(Boolean);
-				const matchesAllTokens = queryTokens.every(token => {
-					const titleMatch = internship.title.toLowerCase().includes(token);
-					const descMatch = internship.description.toLowerCase().includes(token);
-					const skillMatch = internship.skillsRequired.some(s => s.toLowerCase().includes(token));
-					const companyMatch = company.companyName.toLowerCase().includes(token);
-					return titleMatch || descMatch || skillMatch || companyMatch;
-				});
-				if (!matchesAllTokens) return false;
-			}
-
-			if (filterDomain && internship.domain !== filterDomain) return false;
-			if (filterLocation && !internship.location.toLowerCase().includes(filterLocation)) return false;
-			if (filterMode && internship.mode !== filterMode) return false;
-			if (filterType && internship.type !== filterType) return false;
-			if (filterDuration && internship.duration !== filterDuration) return false;
-			if (filterJobOpp && internship.jobOpportunity !== filterJobOpp) return false;
-			if (filterCert && internship.certificateAvailable !== filterCert) return false;
-
-			return true;
-		})
-		.slice(0, 60)
-		.map(internship => {
-			const company = companyMap.get(internship.companyId);
-			return {
-				...internship,
-				companyName: company ? company.companyName : 'Unknown Company',
-				companyLogo: company ? company.companyLogo : '',
-				hasApplied: appliedSet.has(internship.id)
-			};
-		});
-
-	// Fire background updates for expired internships to keep Firebase synced without blocking response
-	if (expiredIds.length > 0) {
-		expiredIds.forEach(id => {
-			updateDocument('internships', id, { status: 'Expired' }).catch(err => {
-				console.error(`Failed to background expire internship ${id}`, err);
-			});
-		});
-	}
-
-	return {
-		student,
-		internships: filteredInternships.slice(0, 50),
-		domains: DOMAINS,
-		filters: {
-			query: searchQuery,
-			domain: filterDomain,
-			location: filterLocation,
-			mode: filterMode,
-			type: filterType,
-			duration: filterDuration,
-			jobOpportunity: filterJobOpp,
-			certificateAvailable: filterCert
+		const student = await getDocument('students', sessionUser.id);
+		if (!student) {
+			cookies.delete('nexora_session', { path: '/' });
+			throw redirect(303, '/login');
 		}
-	};
+
+		// Get filter parameters from URL query string
+		const searchQuery = url.searchParams.get('query')?.toLowerCase().trim() || '';
+		const filterCompanyId = url.searchParams.get('companyId') || '';
+		const filterDomain = url.searchParams.get('domain') || '';
+		const filterLocation = url.searchParams.get('location')?.toLowerCase().trim() || '';
+		const filterMode = url.searchParams.get('mode') || '';
+		const filterType = url.searchParams.get('type') || '';
+		const filterDuration = url.searchParams.get('duration') || '';
+		const filterJobOpp = url.searchParams.get('jobOpportunity') || '';
+		const filterCert = url.searchParams.get('certificateAvailable') || '';
+
+		// Use paginated query instead of loading the entire database for search, but increase limit to allow searching the expanded dataset
+		let internshipsData;
+		if (filterCompanyId) {
+			internshipsData = await queryDocuments('internships', 'companyId', filterCompanyId);
+		} else {
+			internshipsData = await queryDocumentsPaginated('internships', 'status', 'Active', 2000);
+		}
+		
+		// Batch fetch only needed companies
+		const companyIds = [...new Set((internshipsData || []).map(i => i && i.companyId).filter(Boolean))];
+		const companiesData = await Promise.all(companyIds.map(id => getDocument('companies', id)));
+
+		// Get student's existing applications (targeted query)
+		const rawApps = await queryDocumentsPaginated('applications', 'studentId', student.id, 100);
+		const studentApps = (rawApps || []).map(a => a && a.internshipId).filter(Boolean);
+		const appliedSet = new Set(studentApps);
+
+		// Map company profiles for quick lookup
+		const companyMap = new Map((companiesData || []).filter(c => c !== null && c !== undefined).map(c => [c.id, c]));
+
+		// Filter internships
+		const now = new Date();
+		const expiredIds = [];
+
+		const filteredInternships = (internshipsData || [])
+			.filter(internship => {
+				if (!internship) return false;
+				// Check for automatic expiration based on date
+				if (internship.lastDateToApply) {
+					const deadline = new Date(internship.lastDateToApply);
+					deadline.setHours(23, 59, 59, 999);
+					if (now > deadline) {
+						expiredIds.push(internship.id);
+						return false;
+					}
+				}
+
+				// Only show active postings
+				if (internship.status !== 'Active') return false;
+
+				const company = companyMap.get(internship.companyId);
+				// Exclude unapproved or suspended company listings
+				if (!company || company.isSuspended || company.status !== 'Approved') return false;
+
+				// Search query (titles, description, skills, company name)
+				if (searchQuery) {
+					const queryTokens = searchQuery.split(/\s+/).filter(Boolean);
+					const matchesAllTokens = queryTokens.every(token => {
+						const titleMatch = (internship.title || '').toLowerCase().includes(token);
+						const descMatch = (internship.description || '').toLowerCase().includes(token);
+						const skillMatch = (internship.skillsRequired || []).some(s => s.toLowerCase().includes(token));
+						const companyMatch = (company.companyName || '').toLowerCase().includes(token);
+						return titleMatch || descMatch || skillMatch || companyMatch;
+					});
+					if (!matchesAllTokens) return false;
+				}
+
+				if (filterDomain && internship.domain !== filterDomain) return false;
+				if (filterLocation && !(internship.location || '').toLowerCase().includes(filterLocation)) return false;
+				if (filterMode && internship.mode !== filterMode) return false;
+				if (filterType && internship.type !== filterType) return false;
+				if (filterDuration && internship.duration !== filterDuration) return false;
+				if (filterJobOpp && internship.jobOpportunity !== filterJobOpp) return false;
+				if (filterCert && internship.certificateAvailable !== filterCert) return false;
+
+				return true;
+			})
+			.slice(0, 60)
+			.map(internship => {
+				const company = companyMap.get(internship.companyId);
+				return {
+					...internship,
+					companyName: company ? company.companyName : 'Unknown Company',
+					companyLogo: company ? company.companyLogo : '',
+					hasApplied: appliedSet.has(internship.id)
+				};
+			});
+
+		// Fire background updates for expired internships to keep Firebase synced without blocking response
+		if (expiredIds.length > 0) {
+			expiredIds.forEach(id => {
+				updateDocument('internships', id, { status: 'Expired' }).catch(err => {
+					console.error(`Failed to background expire internship ${id}`, err);
+				});
+			});
+		}
+
+		return {
+			student,
+			internships: filteredInternships.slice(0, 50),
+			domains: DOMAINS,
+			filters: {
+				query: searchQuery,
+				domain: filterDomain,
+				location: filterLocation,
+				mode: filterMode,
+				type: filterType,
+				duration: filterDuration,
+				jobOpportunity: filterJobOpp,
+				certificateAvailable: filterCert
+			},
+			debugError: null
+		};
+	} catch (e) {
+		if (e.status === 303) throw e;
+		console.error("PAGE CRASH ERROR:", e);
+		return {
+			student: { fullName: 'Error', email: '' },
+			internships: [],
+			domains: DOMAINS,
+			filters: {},
+			debugError: e.message || e.toString()
+		};
+	}
 }
 
 export const actions = {

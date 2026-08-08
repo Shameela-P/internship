@@ -6,6 +6,7 @@
 	
 	const internships = $derived(data.internships);
 	const domains = $derived(data.domains);
+	const debugError = $derived(data.debugError);
 	const student = $derived(data.student);
 	const filters = $derived(data.filters);
 

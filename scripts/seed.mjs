@@ -43,12 +43,6 @@ function dateFuture(days) { const d = new Date(); d.setDate(d.getDate() + days);
 
 // ─── Data Banks ────────────────────────────────────────────────────────────────
 
-const COMPANY_PREFIXES = [
-	'Global', 'Prime', 'Apex', 'Nexus', 'Alpha', 'Sigma', 'Nova', 'Zenith', 'Vertex',
-	'Pinnacle', 'Stellar', 'Titan', 'Atlas', 'Omega', 'Summit', 'Horizon', 'Catalyst',
-	'Frontier', 'Velocity', 'Quantum', 'Fusion', 'Synergy', 'Vanguard', 'Clarity',
-	'Aurora', 'Insight', 'Momentum', 'Strategic', 'Elevated', 'Advanced', 'Intellect',
-	'BlueSky', 'GreenPath', 'InnoTech', 'BrightEdge', 'CoreLogic', 'DataPath',
 const REAL_COMPANIES = [
 	{ name: 'Google', domain: 'google.com' },
 	{ name: 'Microsoft', domain: 'microsoft.com' },
