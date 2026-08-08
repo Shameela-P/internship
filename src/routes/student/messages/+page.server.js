@@ -4,36 +4,37 @@ import { fail } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
 	const sessionUser = requireRole(cookies, ['student']);
-	const [studentsData, companiesData, messagesData, notificationsData] = await Promise.all([
-		getCollection('students'),
-		getCollection('companies'),
-		getCollection('messages'),
-		getCollection('notifications')
+	
+	const [student, companiesData, messagesData] = await Promise.all([
+		getDocument('students', sessionUser.id),
+		queryDocumentsPaginated('companies', 'status', 'Approved', 100),
+		getCollection('messages')
 	]);
-	const db = { students: studentsData, companies: companiesData, messages: messagesData, notifications: notificationsData };
-	const student = db.students.find(s => s.id === sessionUser.id);
 
-	if (!db.messages) {
-		db.messages = [];
+	if (!student) {
+		throw redirect(303, '/login');
 	}
 
+	const messagesList = messagesData || [];
+
 	// Filter messages involving this student
-	const userMessages = db.messages.filter(m => 
-		m.senderEmail.toLowerCase() === student.email.toLowerCase() || 
-		m.recipientEmail.toLowerCase() === student.email.toLowerCase()
+	const userMessages = messagesList.filter(m => 
+		m && m.senderEmail && m.recipientEmail &&
+		(m.senderEmail.toLowerCase() === student.email.toLowerCase() || 
+		 m.recipientEmail.toLowerCase() === student.email.toLowerCase())
 	);
 
 	// Automatically mark incoming messages as read
-	for (const m of db.messages) {
-		if (m.recipientEmail.toLowerCase() === student.email.toLowerCase() && !m.read) {
+	for (const m of messagesList) {
+		if (m && m.recipientEmail && m.recipientEmail.toLowerCase() === student.email.toLowerCase() && !m.read) {
 			m.read = true;
-			await updateDocument('messages', m.id, { read: true });
+			// Don't wait for all DB updates to finish before rendering the page! Fire and forget.
+			updateDocument('messages', m.id, { read: true }).catch(e => console.error("Update read status failed", e));
 		}
 	}
 
-	// Contacts list: All verified companies + Admin Support
-	const companies = db.companies.filter(c => c.status === 'Approved' && !c.isSuspended)
-		.slice(0, 100)
+	// Contacts list: 100 verified companies + Admin Support
+	const companies = (companiesData || []).filter(c => c && !c.isSuspended)
 		.map(c => ({
 			name: c.companyName,
 			email: c.companyEmail,
@@ -55,14 +56,11 @@ export async function load({ cookies }) {
 export const actions = {
 	sendMessage: async ({ request, cookies }) => {
 		const sessionUser = requireRole(cookies, ['student']);
-		const [studentsData, companiesData, messagesData, notificationsData] = await Promise.all([
-			getCollection('students'),
-			getCollection('companies'),
-			getCollection('messages'),
-			getCollection('notifications')
-		]);
-		const db = { students: studentsData, companies: companiesData, messages: messagesData, notifications: notificationsData };
-		const student = db.students.find(s => s.id === sessionUser.id);
+		const student = await getDocument('students', sessionUser.id);
+		
+		if (!student) {
+			return fail(400, { success: false, error: 'Student profile not found' });
+		}
 
 		const formData = await request.formData();
 		const recipientEmail = formData.get('recipientEmail')?.toString().trim();
@@ -88,7 +86,9 @@ export const actions = {
 		};
 
 		await addDocument('messages', newMessage);
-		await addDocument('notifications', {
+		
+		// Fire notification in background without blocking response
+		addDocument('notifications', {
 			id: 'notif_' + Date.now(),
 			recipientEmail,
 			recipientRole: recipientRole,
@@ -96,7 +96,7 @@ export const actions = {
 			body: 'You received a new message: "' + content.substring(0, 50) + '..."',
 			date: new Date().toISOString(),
 			read: false
-		});
+		}).catch(e => console.error('Failed to add notification', e));
 
 		return { success: true };
 	}
