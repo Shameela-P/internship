@@ -1,3 +1,4 @@
+import { redirect } from '@sveltejs/kit';
 import { DOMAINS, getCollection } from '$lib/db';
 import { requireRole } from '$lib/auth';
 
@@ -13,7 +14,7 @@ export async function load({ cookies, url }) {
 	const student = db.students.find(s => s.id === sessionUser.id);
 	if (!student) {
 		cookies.delete('nexora_session', { path: '/' });
-		throw new Error('Student session not found');
+		throw redirect(303, '/login');
 	}
 
 	// Extract filters from URL search params

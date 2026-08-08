@@ -49,30 +49,57 @@ const COMPANY_PREFIXES = [
 	'Frontier', 'Velocity', 'Quantum', 'Fusion', 'Synergy', 'Vanguard', 'Clarity',
 	'Aurora', 'Insight', 'Momentum', 'Strategic', 'Elevated', 'Advanced', 'Intellect',
 	'BlueSky', 'GreenPath', 'InnoTech', 'BrightEdge', 'CoreLogic', 'DataPath',
-	'NetForce', 'CloudPeak', 'SmartHub', 'TechPilot', 'DigitalWave', 'ByteForge',
-	'CyberCore', 'SwiftCode', 'DeepMind', 'OpenBridge', 'MetaBase', 'NexGen',
-	'ProVector', 'ClearVision', 'RapidScale', 'TrueNorth', 'IronBridge', 'SilverLine',
-	'RedHaven', 'BlueChip', 'GoldMine', 'PurePath', 'SafeHarbor', 'FastTrack',
-	'BroadReach', 'DeepRoot', 'HighPoint', 'LongBridge', 'SharpMind', 'QuickFlow',
-	'Bright', 'Smart', 'Sure', 'Pure', 'Fast', 'Bold', 'True', 'Real', 'First',
-	'NextGen', 'ProTech', 'MaxBuild', 'ZeroTo', 'InfinityEdge', 'PoweredBy', 'FutureMade'
-];
-
-const COMPANY_TYPES = [
-	'Solutions', 'Technologies', 'Systems', 'Ventures', 'Labs', 'Innovations',
-	'Consulting', 'Services', 'Enterprises', 'Corporation', 'Holdings', 'Group',
-	'Agency', 'Studio', 'Dynamics', 'Analytics', 'Digital', 'Networks', 'Partners',
-	'Associates', 'Global', 'Worldwide', 'International', 'Industries', 'Works',
-	'Soft', 'Bytes', 'Codes', 'Build', 'Media', 'Hub', 'Base', 'Co', 'Inc', 'Ltd'
-];
-
-const COMPANY_CORES = [
-	'Tech', 'Data', 'Cloud', 'Cyber', 'AI', 'Net', 'Web', 'Mobile', 'Dev', 'Code',
-	'Soft', 'Biz', 'Info', 'Finance', 'Market', 'Design', 'Research', 'Build', 'Scale',
-	'Logic', 'Sync', 'Link', 'Bridge', 'Flow', 'Stream', 'Core', 'Edge', 'Base',
-	'Wave', 'Pulse', 'Spark', 'Forge', 'Craft', 'Path', 'Point', 'Source', 'Force',
-	'Mind', 'Vision', 'Brand', 'Sales', 'Growth', 'Health', 'Bio', 'Agro', 'Eco',
-	'Media', 'Content', 'Pixel', 'Frame', 'Space', 'Time', 'Value', 'Smart', 'Rapid'
+const REAL_COMPANIES = [
+	{ name: 'Google', domain: 'google.com' },
+	{ name: 'Microsoft', domain: 'microsoft.com' },
+	{ name: 'Amazon', domain: 'amazon.com' },
+	{ name: 'Apple', domain: 'apple.com' },
+	{ name: 'Meta', domain: 'meta.com' },
+	{ name: 'Netflix', domain: 'netflix.com' },
+	{ name: 'Tesla', domain: 'tesla.com' },
+	{ name: 'IBM', domain: 'ibm.com' },
+	{ name: 'Intel', domain: 'intel.com' },
+	{ name: 'Cisco', domain: 'cisco.com' },
+	{ name: 'Oracle', domain: 'oracle.com' },
+	{ name: 'SAP', domain: 'sap.com' },
+	{ name: 'Salesforce', domain: 'salesforce.com' },
+	{ name: 'Adobe', domain: 'adobe.com' },
+	{ name: 'TCS (Tata Consultancy Services)', domain: 'tcs.com' },
+	{ name: 'Infosys', domain: 'infosys.com' },
+	{ name: 'Wipro', domain: 'wipro.com' },
+	{ name: 'HCLTech', domain: 'hcltech.com' },
+	{ name: 'Tech Mahindra', domain: 'techmahindra.com' },
+	{ name: 'Cognizant', domain: 'cognizant.com' },
+	{ name: 'Accenture', domain: 'accenture.com' },
+	{ name: 'Capgemini', domain: 'capgemini.com' },
+	{ name: 'L&T Technology Services', domain: 'ltts.com' },
+	{ name: 'Mindtree', domain: 'mindtree.com' },
+	{ name: 'Mphasis', domain: 'mphasis.com' },
+	{ name: 'Zoho', domain: 'zoho.com' },
+	{ name: 'Freshworks', domain: 'freshworks.com' },
+	{ name: 'Paytm', domain: 'paytm.com' },
+	{ name: 'Flipkart', domain: 'flipkart.com' },
+	{ name: 'Swiggy', domain: 'swiggy.com' },
+	{ name: 'Zomato', domain: 'zomato.com' },
+	{ name: 'Ola Cabs', domain: 'olacabs.com' },
+	{ name: 'Oyo Rooms', domain: 'oyorooms.com' },
+	{ name: 'Byju\'s', domain: 'byjus.com' },
+	{ name: 'Zerodha', domain: 'zerodha.com' },
+	{ name: 'Razorpay', domain: 'razorpay.com' },
+	{ name: 'Cred', domain: 'cred.club' },
+	{ name: 'Postman', domain: 'postman.com' },
+	{ name: 'BrowserStack', domain: 'browserstack.com' },
+	{ name: 'Uber', domain: 'uber.com' },
+	{ name: 'Airbnb', domain: 'airbnb.com' },
+	{ name: 'Spotify', domain: 'spotify.com' },
+	{ name: 'Twitter (X)', domain: 'x.com' },
+	{ name: 'LinkedIn', domain: 'linkedin.com' },
+	{ name: 'Nvidia', domain: 'nvidia.com' },
+	{ name: 'AMD', domain: 'amd.com' },
+	{ name: 'Qualcomm', domain: 'qualcomm.com' },
+	{ name: 'Dell Technologies', domain: 'dell.com' },
+	{ name: 'HP (Hewlett-Packard)', domain: 'hp.com' },
+	{ name: 'Lenovo', domain: 'lenovo.com' }
 ];
 
 const INDUSTRIES = [
@@ -227,6 +254,38 @@ const DEGREE_COURSES = [
 
 const YEARS = ['1', '2', '3', '4'];
 
+const COMPANY_PREFIXES = [
+	'Global', 'Prime', 'Apex', 'Nexus', 'Alpha', 'Sigma', 'Nova', 'Zenith', 'Vertex',
+	'Pinnacle', 'Stellar', 'Titan', 'Atlas', 'Omega', 'Summit', 'Horizon', 'Catalyst',
+	'Frontier', 'Velocity', 'Quantum', 'Fusion', 'Synergy', 'Vanguard', 'Clarity',
+	'Aurora', 'Insight', 'Momentum', 'Strategic', 'Elevated', 'Advanced', 'Intellect',
+	'BlueSky', 'GreenPath', 'InnoTech', 'BrightEdge', 'CoreLogic', 'DataPath',
+	'NetForce', 'CloudPeak', 'SmartHub', 'TechPilot', 'DigitalWave', 'ByteForge',
+	'CyberCore', 'SwiftCode', 'DeepMind', 'OpenBridge', 'MetaBase', 'NexGen',
+	'ProVector', 'ClearVision', 'RapidScale', 'TrueNorth', 'IronBridge', 'SilverLine',
+	'RedHaven', 'BlueChip', 'GoldMine', 'PurePath', 'SafeHarbor', 'FastTrack',
+	'BroadReach', 'DeepRoot', 'HighPoint', 'LongBridge', 'SharpMind', 'QuickFlow',
+	'Bright', 'Smart', 'Sure', 'Pure', 'Fast', 'Bold', 'True', 'Real', 'First',
+	'NextGen', 'ProTech', 'MaxBuild', 'ZeroTo', 'InfinityEdge', 'PoweredBy', 'FutureMade'
+];
+
+const COMPANY_TYPES = [
+	'Solutions', 'Technologies', 'Systems', 'Ventures', 'Labs', 'Innovations',
+	'Consulting', 'Services', 'Enterprises', 'Corporation', 'Holdings', 'Group',
+	'Agency', 'Studio', 'Dynamics', 'Analytics', 'Digital', 'Networks', 'Partners',
+	'Associates', 'Global', 'Worldwide', 'International', 'Industries', 'Works',
+	'Soft', 'Bytes', 'Codes', 'Build', 'Media', 'Hub', 'Base', 'Co', 'Inc', 'Ltd'
+];
+
+const COMPANY_CORES = [
+	'Tech', 'Data', 'Cloud', 'Cyber', 'AI', 'Net', 'Web', 'Mobile', 'Dev', 'Code',
+	'Soft', 'Biz', 'Info', 'Finance', 'Market', 'Design', 'Research', 'Build', 'Scale',
+	'Logic', 'Sync', 'Link', 'Bridge', 'Flow', 'Stream', 'Core', 'Edge', 'Base',
+	'Wave', 'Pulse', 'Spark', 'Forge', 'Craft', 'Path', 'Point', 'Source', 'Force',
+	'Mind', 'Vision', 'Brand', 'Sales', 'Growth', 'Health', 'Bio', 'Agro', 'Eco',
+	'Media', 'Content', 'Pixel', 'Frame', 'Space', 'Time', 'Value', 'Smart', 'Rapid'
+];
+
 // ─── Generator Functions ───────────────────────────────────────────────────────
 
 function generateCompanyName(industry) {
@@ -237,8 +296,25 @@ function generateCompanyName(industry) {
 }
 
 function generateCompany(index) {
+	let name, emailDomain, website;
+	
+	if (index < REAL_COMPANIES.length) {
+		// Use real company
+		const realComp = REAL_COMPANIES[index];
+		name = realComp.name;
+		emailDomain = realComp.domain;
+		website = `https://www.${realComp.domain}`;
+	} else {
+		// Generate fake company
+		const industry = pick(INDUSTRIES);
+		name = generateCompanyName(industry);
+		const emailDomains = ['gmail.com', 'company.com', 'corp.in', 'solutions.io', 'tech.co', 'group.in', 'ventures.com'];
+		const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 12);
+		emailDomain = `${slug}.${pick(emailDomains.slice(1))}`;
+		website = `https://www.${slug}.com`;
+	}
+
 	const industry = pick(INDUSTRIES);
-	const name = generateCompanyName(industry);
 	const city = pick(CITIES);
 	const id = `comp_${index + 1}`;
 	const statusRoll = rand(1, 10);
@@ -247,15 +323,12 @@ function generateCompany(index) {
 	const approved = status === 'Approved';
 	const canPostInternships = status === 'Approved' && !isSuspended;
 
-	const emailDomains = ['gmail.com', 'company.com', 'corp.in', 'solutions.io', 'tech.co', 'group.in', 'ventures.com'];
-	const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 12);
-
 	return {
 		id,
 		companyName: name,
-		companyEmail: `hr@${slug}.${pick(emailDomains.slice(1))}`,
+		companyEmail: `hr@${emailDomain}`,
 		companyContactNumber: `9${rand(100000000, 999999999)}`,
-		website: `https://www.${slug}.com`,
+		website,
 		companyAddress: `${rand(1, 500)} ${pick(['Tech Park', 'Business Hub', 'Commercial Complex', 'Industrial Area', 'Corporate Tower'])}, ${city}`,
 		companyDescription: `${name} is a ${pick(['leading', 'pioneering', 'rapidly growing', 'innovative', 'established'])} ${industry} company based in ${city}. We are committed to excellence, innovation, and creating meaningful career opportunities for students and professionals.`,
 		industryType: industry,
@@ -264,7 +337,7 @@ function generateCompany(index) {
 		status,
 		approved,
 		canPostInternships,
-		isSuspended: isSuspended,
+		isSuspended,
 		createdAt: dateAgo(rand(30, 730))
 	};
 }
@@ -357,7 +430,7 @@ function generateStudent(index) {
 
 async function seed() {
 	const COMPANY_COUNT = 1000;
-	const STUDENT_COUNT = 250;
+	const STUDENT_COUNT = 550;
 	const MIN_INTERNSHIPS_PER_COMPANY = 10;
 	const MAX_INTERNSHIPS_PER_COMPANY = 13;
 	const BATCH_SIZE = 100; // companies per batch

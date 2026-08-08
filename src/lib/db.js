@@ -211,7 +211,9 @@ export function invalidateCache(collectionName = null) {
  */
 export async function getCollection(collectionName) {
 	const now = Date.now();
-	if (cache[collectionName] && cacheTimestamps[collectionName] && now - cacheTimestamps[collectionName] < CACHE_DURATION) {
+	const skipCache = collectionName === 'messages' || collectionName === 'notifications';
+	
+	if (!skipCache && cache[collectionName] && cacheTimestamps[collectionName] && now - cacheTimestamps[collectionName] < CACHE_DURATION) {
 		return [...cache[collectionName]]; // Return copy to prevent accidental mutation
 	}
 

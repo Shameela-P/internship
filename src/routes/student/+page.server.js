@@ -1,6 +1,6 @@
 import { getDocument, queryDocuments, getCollection, queryDocumentsPaginated } from '$lib/db';
 import { requireRole } from '$lib/auth';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
 	try {
@@ -8,7 +8,10 @@ export async function load({ cookies }) {
 		
 		// 1. Fetch Student Profile directly (critical config data)
 		const student = await getDocument('students', sessionUser.id);
-		if (!student) throw new Error("Student profile not found");
+		if (!student) {
+			cookies.delete('nexora_session', { path: '/' });
+			throw redirect(303, '/login');
+		}
 
 		// 2. Fetch raw applications for accurate live statistics
 		const rawApps = await queryDocuments('applications', 'studentId', student.id) || [];

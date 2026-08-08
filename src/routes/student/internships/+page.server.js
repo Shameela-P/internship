@@ -1,6 +1,6 @@
 import { logAction, DOMAINS, getDocument, getCollection, addDocument, queryDocuments, queryDocumentsPaginated, getPaginated, updateDocument } from '$lib/db';
 import { requireRole } from '$lib/auth';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
 export async function load({ cookies, url }) {
 	const sessionUser = requireRole(cookies, ['student']);
@@ -8,11 +8,12 @@ export async function load({ cookies, url }) {
 	const student = await getDocument('students', sessionUser.id);
 	if (!student) {
 		cookies.delete('nexora_session', { path: '/' });
-		throw new Error('Student session not found');
+		throw redirect(303, '/login');
 	}
 
 	// Get filter parameters from URL query string
 	const searchQuery = url.searchParams.get('query')?.toLowerCase().trim() || '';
+	const filterCompanyId = url.searchParams.get('companyId') || '';
 	const filterDomain = url.searchParams.get('domain') || '';
 	const filterLocation = url.searchParams.get('location')?.toLowerCase().trim() || '';
 	const filterMode = url.searchParams.get('mode') || '';
@@ -22,7 +23,12 @@ export async function load({ cookies, url }) {
 	const filterCert = url.searchParams.get('certificateAvailable') || '';
 
 	// Use paginated query instead of loading the entire database for search, but increase limit to allow searching the expanded dataset
-	const internshipsData = await queryDocumentsPaginated('internships', 'status', 'Active', 2000);
+	let internshipsData;
+	if (filterCompanyId) {
+		internshipsData = await queryDocuments('internships', 'companyId', filterCompanyId);
+	} else {
+		internshipsData = await queryDocumentsPaginated('internships', 'status', 'Active', 2000);
+	}
     
     // Batch fetch only needed companies
     const companyIds = [...new Set(internshipsData.map(i => i.companyId))];
