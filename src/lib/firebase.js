@@ -8,7 +8,7 @@ import { building } from '$app/environment';
 const firebaseConfig = {
 	apiKey: env.PUBLIC_FIREBASE_API_KEY?.trim() || (building ? 'mock-api-key' : ''),
 	authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN?.trim() || (building ? 'mock-auth-domain' : ''),
-	databaseURL: 'https://internship-7f490-default-rtdb.firebaseio.com',
+	databaseURL: env.PUBLIC_FIREBASE_DATABASE_URL?.trim() || (building ? 'mock-database-url' : ''),
 	projectId: env.PUBLIC_FIREBASE_PROJECT_ID?.trim() || (building ? 'mock-project-id' : ''),
 	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET?.trim() || (building ? 'mock-bucket' : ''),
 	messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim() || (building ? 'mock-sender' : ''),

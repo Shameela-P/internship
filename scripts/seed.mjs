@@ -8,16 +8,17 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, set, update } from 'firebase/database';
 import crypto from 'crypto';
 
-// ─── Firebase Config ───────────────────────────────────────────────────────────
 const firebaseConfig = {
-	apiKey: "AIzaSyDPr1lV-ChuWz91HhfReg8L21WKqmH0s-g",
-	authDomain: "internship-portal-705f1.firebaseapp.com",
-	databaseURL: "https://internship-portal-705f1-default-rtdb.firebaseio.com",
-	projectId: "internship-portal-705f1",
-	storageBucket: "internship-portal-705f1.firebasestorage.app",
-	messagingSenderId: "784418638868",
-	appId: "1:784418638868:web:bbddff4d4780fd758d2b01"
+	apiKey: "AIzaSyCHnHBtQi6rrThsszBiRQcOM1pAan0hu78",
+	authDomain: "interview-platform-ba694.firebaseapp.com",
+	databaseURL: "https://interview-platform-ba694-default-rtdb.firebaseio.com",
+	projectId: "interview-platform-ba694",
+	storageBucket: "interview-platform-ba694.firebasestorage.app",
+	messagingSenderId: "1023495287485",
+	appId: "1:1023495287485:web:90312783497fb507217dd4",
+	measurementId: "G-TKRG3W70V1"
 };
+
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
